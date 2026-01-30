@@ -100,7 +100,7 @@ For instance, if you plan to train SaMam model on **2 GPUs**, and image patch si
 
 #### :worried:**Training on pure torch**
 
-If you just use windows platform or the device can not be equipped with mamba-ssm, you can train our SaMam with only torch. However, you should be patient when training because the convergence speed is **very very very slow**! You can specify hyper-parameter **"mamba-from-trion" to 0**. Run:
+If you just use Windows platform or the device which can not be equipped with mamba-ssm, you can train our SaMam with only Torch. However, you should be patient when training because the convergence speed is **very very very slow**! You can specify hyper-parameter **"mamba-from-trion" to 0**. Run:
 
 ```
 python train_SaMam.py --content [train_content_dataset_folder] --style [train_style_dataset_folder] --mamba-from-trion 0
