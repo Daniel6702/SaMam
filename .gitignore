@@ -1,0 +1,12 @@
+*.pth
+*.ckpt
+
+__pycache__/
+*.pyc
+
+.venv/
+venv/
+env/
+ENV/
+
+TRAIN/Dataset/
