@@ -1,7 +1,7 @@
 import argparse
 from argparse import ArgumentParser
 from pathlib import Path
-
+from pytorch_lightning.callbacks import EarlyStopping
 import os
 
 project_root = os.path.abspath('..')
@@ -112,6 +112,10 @@ def parse_args():
     parser.add_argument('--apply-identity-loss', action='store_true', help="apply_identity_loss")
     
     parser.formatter_class = argparse.ArgumentDefaultsHelpFormatter
+
+    # Add early stopping
+    parser.add_argument('--early-stopping',action='store_true',help='Enable early stopping during training')
+    
     return vars(parser.parse_args())
     
 
@@ -130,10 +134,24 @@ if __name__ == '__main__':
         max_epochs = torch.load(args['checkpoint'])['epoch'] + 1
         model = LightningModel.load_from_checkpoint(checkpoint_path=args['checkpoint'])
 
-    datamodule = DataModule(**args)
-
+    datamodule = DataModule(**args)        
     logger = TensorBoardImageLogger(args['log_dir'], name='logs')
     lr_monitor = LearningRateMonitor(logging_interval='step')
+    
+    early_stop = None
+
+    if args['early_stopping']:
+        early_stop = EarlyStopping(
+            monitor="val_loss",
+            min_delta=0.0005,
+            patience=12,
+            mode="min",
+            verbose=True
+        )
+    callbacks = [lr_monitor]
+    if early_stop is not None:
+        callbacks.append(early_stop)
+    
     trainer = Trainer(
         accelerator="gpu",
         devices=gpus,
@@ -141,7 +159,7 @@ if __name__ == '__main__':
         max_steps=args['iterations'],
         val_check_interval=args['val_interval'],
         logger=logger,
-        callbacks=[lr_monitor],
+        callbacks=callbacks,
         accumulate_grad_batches=args['accumulate_grad_batches']
         #precision="16-mixed", [does not work]
     )

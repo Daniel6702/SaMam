@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from math import sqrt
 from statistics import mean
-
+import os
 import pytorch_lightning as pl
 import torch
 from torch.optim import Adam
@@ -10,7 +10,6 @@ from torchvision.utils import make_grid
 
 from MODEL.SaMam_model import SaMam
 from LOSS.losses import Integration_loss
-
 
 class LightningModel(pl.LightningModule):
 
@@ -43,7 +42,6 @@ class LightningModel(pl.LightningModule):
         self.lambda1 = lambda1
         self.lambda2 = lambda2
         self.ssim_weight = ssim_weight
-
         ##################
         self._printed_val = False
         ##################
@@ -84,6 +82,7 @@ class LightningModel(pl.LightningModule):
         batch_size = content.shape[0]
 
         Ics = []
+        
         for i in range(0, batch_size):
             content_i = content[i:i + 1, :, :, :]
             style_i = style[i:i + 1, :, :, :]
@@ -122,27 +121,43 @@ class LightningModel(pl.LightningModule):
 
         # Return output only for validation step
         if step == 'val':
-
-            ##################
-            total_loss = content_loss + style_loss + identity_loss1 + identity_loss2
+            total_loss = (
+                content_loss +
+                style_loss +
+                identity_loss1 +
+                identity_loss2 +
+                ssim_loss
+            )
+        
+            # IMPORTANT: this is what EarlyStopping monitors
+            self.log(
+                "val_loss",
+                total_loss,
+                prog_bar=True,
+                on_step=False,
+                on_epoch=True,
+                sync_dist=False
+            )
+        
             if not self._printed_val:
-                print(f"[VAL] total={total_loss.item():.4f} | "
-                      f"content={content_loss.item():.4f} | "
-                      f"style={style_loss.item():.4f} | "
-                      f"id1={identity_loss1.item():.4f} | "
-                      f"id2={identity_loss2.item():.4f}")
+                print(
+                    f"[VAL] total={total_loss.item():.4f} | "
+                    f"content={content_loss.item():.4f} | "
+                    f"style={style_loss.item():.4f} | "
+                    f"id1={identity_loss1.item():.4f} | "
+                    f"id2={identity_loss2.item():.4f}"
+                )
                 self._printed_val = True
-            ##################
                 
             self.validation_step_outputs.append({
-                'loss': content_loss + style_loss + identity_loss1 + identity_loss2 + ssim_loss,
+                'loss': total_loss,
                 'output': Ics,
                 'content': content,
                 'style': style
             })
 
             return {
-                'loss': content_loss + style_loss + identity_loss1 + identity_loss2 + ssim_loss,
+                'loss': total_loss,
                 'output': Ics,
             }
 
