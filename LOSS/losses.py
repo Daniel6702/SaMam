@@ -86,9 +86,16 @@ class Integration_loss(nn.Module):
                 param.requires_grad = False
 
         if apply_huber_loss:
-            self.loss = nn.HuberLoss()  #nn.MSELoss()
+            '''
+            Huber Loss improved style performance, at a slight cost of content performance. Thus we will try to only applied it to the style loss component.
+            '''
+            self.content_loss_fn = nn.MSELoss()
+            self.style_loss_fn = nn.HuberLoss(delta=1) #default: delta=1
+            self.identity_loss_fn = nn.MSELoss()
         else:
-            self.loss = nn.MSELoss()
+            self.content_loss_fn = nn.MSELoss()
+            self.style_loss_fn = nn.MSELoss()
+            self.identity_loss_fn = nn.MSELoss()
 
         self.apply_SSIM_loss = apply_SSIM_loss
         self.apply_identity_loss = apply_identity_loss
@@ -97,7 +104,6 @@ class Integration_loss(nn.Module):
         assert input.size() == target.size()
         assert target.requires_grad is False
     
-        # adjust if your range is [-1,1]
         input = torch.clamp(input, 0.0, 1.0)
         target = torch.clamp(target, 0.0, 1.0)
     
@@ -113,14 +119,19 @@ class Integration_loss(nn.Module):
     def calc_content_loss(self, input, target):
         assert (input.size() == target.size())
         assert (target.requires_grad is False)
-        return self.loss(input, target)
+        return self.content_loss_fn(input, target)
+    
+    def calc_identity_loss(self, input, target):
+        assert (input.size() == target.size())
+        assert (target.requires_grad is False)
+        return self.identity_loss_fn(input, target)
 
     def calc_style_loss(self, input, target):
         assert (input.size() == target.size())
         assert (target.requires_grad is False)
         input_mean, input_std = calc_mean_std(input)
         target_mean, target_std = calc_mean_std(target)
-        return self.loss(input_mean, target_mean) + self.loss(input_std, target_std)
+        return self.style_loss_fn(input_mean, target_mean) + self.style_loss_fn(input_std, target_std)
 
     def forward(self, Ics, samples_cc, samples_ss, samples_c, samples_s):
         Ic_feats = self.encode_with_intermediate(samples_c)
@@ -136,18 +147,18 @@ class Integration_loss(nn.Module):
             loss_s += self.calc_style_loss(Ics_feats[i], Is_feats[i])
     
         if self.apply_identity_loss:
-            loss_lambda1 = self.calc_content_loss(samples_cc, samples_c) + \
-                           self.calc_content_loss(samples_ss, samples_s)
+            loss_lambda1 = self.calc_identity_loss(samples_cc, samples_c) + \
+                           self.calc_identity_loss(samples_ss, samples_s)
     
             Icc_feats = self.encode_with_intermediate(samples_cc)
             Iss_feats = self.encode_with_intermediate(samples_ss)
     
-            loss_lambda2 = self.calc_content_loss(Icc_feats[0], Ic_feats[0]) + \
-                           self.calc_content_loss(Iss_feats[0], Is_feats[0])
+            loss_lambda2 = self.calc_identity_loss(Icc_feats[0], Ic_feats[0]) + \
+                           self.calc_identity_loss(Iss_feats[0], Is_feats[0])
     
             for i in range(1, 5):
-                loss_lambda2 += self.calc_content_loss(Icc_feats[i], Ic_feats[i]) + \
-                                self.calc_content_loss(Iss_feats[i], Is_feats[i])
+                loss_lambda2 += self.calc_identity_loss(Icc_feats[i], Ic_feats[i]) + \
+                                self.calc_identity_loss(Iss_feats[i], Is_feats[i])
         else:
             loss_lambda1 = Ics.new_tensor(0.0)
             loss_lambda2 = Ics.new_tensor(0.0)
