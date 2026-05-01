@@ -9,4 +9,14 @@ venv/
 env/
 ENV/
 
+*.ipynb_checkpoints
+*.bash
+*.out
+external/
+OLD_SLURM/
+TRAIN/logs/
+TEST/eval/
+TEST/eval_images/
+
+
 TRAIN/Dataset/

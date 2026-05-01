@@ -20,6 +20,8 @@ from TRAIN.lightning_module.lightningmodel import LightningModel
 
 
 # torch.backends.cudnn.enabled = False
+torch.backends.cudnn.benchmark = True
+torch.set_float32_matmul_precision('high')
 
 class TensorBoardImageLogger(TensorBoardLogger):
     """
@@ -45,6 +47,8 @@ class TensorBoardImageLogger(TensorBoardLogger):
 def parse_args():
     # Init parser
     parser = ArgumentParser()
+
+    parser.add_argument('--output', type=str, default="./checkpoint.ckpt",help="")
 
     # train_model setting
     parser.add_argument('--gpus', nargs='+', default='0',
@@ -73,6 +77,8 @@ def parse_args():
                         help='Directory with test style images. If not set, takes 5 random train_model style images.')
     parser.add_argument('--batch-size', type=int, default=8,
                         help='Training batch size.')
+    parser.add_argument('--accumulate-grad-batches', type=int, default=1,
+                        help='Accumulate Grad Batches.')
 
     # model setting
     parser.add_argument('--nVSSMs', type=int, default=2)
@@ -94,12 +100,20 @@ def parse_args():
     parser.add_argument('--if-identity-loss', type=int, default=1)
     parser.add_argument('--lambda1', type=float, default=70.0)
     parser.add_argument('--lambda2', type=float, default=1.0)
+    parser.add_argument('--ssim-weight', type=float, default=5.0)
+    
     # Optimizer
     parser.add_argument('--lr', type=float, default=0.0001)
-
+    
+    ## APPLY IMPROVEMENTS apply_huber_loss
+    parser.add_argument('--low-vram', action='store_true', help="Enable activation checkpointing")
+    parser.add_argument('--apply-huber-loss', action='store_true', help="apply_huber_loss")
+    parser.add_argument('--apply-SSIM-loss', action='store_true', help="apply_SSIM_loss")
+    parser.add_argument('--apply-identity-loss', action='store_true', help="apply_identity_loss")
+    
     parser.formatter_class = argparse.ArgumentDefaultsHelpFormatter
     return vars(parser.parse_args())
-
+    
 
 if __name__ == '__main__':
     args = parse_args()
@@ -127,8 +141,11 @@ if __name__ == '__main__':
         max_steps=args['iterations'],
         val_check_interval=args['val_interval'],
         logger=logger,
-        callbacks=[lr_monitor]
+        callbacks=[lr_monitor],
+        accumulate_grad_batches=args['accumulate_grad_batches']
+        #precision="16-mixed", [does not work]
     )
 
     trainer.fit(model, datamodule=datamodule)
-    trainer.save_checkpoint("./final_model.ckpt")
+    output = args["output"]
+    trainer.save_checkpoint(output)

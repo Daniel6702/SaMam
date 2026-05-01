@@ -1,0 +1,5 @@
+SaMam Report                                     = 26.305
+SaMam_patchsize_x8                               = ArtFID value: 25.62405014038086
+final_model_1.ckpt                               = ArtFID value: 26.960166931152344
+checkpoint_Hub.ckpt                              = ArtFID value: 23.71871566772461
+checkpoint_Hub_modStyle_20260414_193636.ckpt     = ArtFID value: 27.963083267211914 

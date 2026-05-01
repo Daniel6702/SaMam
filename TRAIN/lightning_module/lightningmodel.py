@@ -24,8 +24,14 @@ class LightningModel(pl.LightningModule):
                  style_weight=7.0,
                  content_weight=7.0,
                  lambda1=70.0, lambda2=1.0,
+                 ssim_weight = 5,
 
                  lr=0.0001,
+
+                 low_vram=False,
+                 apply_huber_loss=False,
+                 apply_SSIM_loss=False,
+                 apply_identity_loss=False,
                  **_):
         super().__init__()
         self.validation_step_outputs = []
@@ -36,9 +42,14 @@ class LightningModel(pl.LightningModule):
         self.content_weight = content_weight
         self.lambda1 = lambda1
         self.lambda2 = lambda2
+        self.ssim_weight = ssim_weight
+
+        ##################
+        self._printed_val = False
+        ##################
 
         # Style loss
-        self.loss_func = Integration_loss()
+        self.loss_func = Integration_loss(apply_huber_loss = apply_huber_loss, apply_SSIM_loss = apply_SSIM_loss, apply_identity_loss=apply_identity_loss)
 
         # Model
         self.model = SaMam(
@@ -53,7 +64,8 @@ class LightningModel(pl.LightningModule):
             expand=expand,
             compress_ratio=compress_ratio,
             squeeze_factor=squeeze_factor,
-            mamba_from_trion=mamba_from_trion
+            mamba_from_trion=mamba_from_trion,
+            use_checkpoint=low_vram
         )
 
     def forward(self, content, style):
@@ -96,7 +108,7 @@ class LightningModel(pl.LightningModule):
         output_Icc = torch.cat(output_Icc, 0)
         output_Iss = torch.cat(output_Iss, 0)
 
-        content_loss, style_loss, identity_loss1, identity_loss2 = self.loss(Ics, output_Icc, output_Iss, content,
+        content_loss, style_loss, identity_loss1, identity_loss2, ssim_loss = self.loss(Ics, output_Icc, output_Iss, content,
                                                                              style)
 
         self.log(rf'id_loss1', identity_loss1.item(), prog_bar=step == 'train_model')
@@ -105,28 +117,45 @@ class LightningModel(pl.LightningModule):
         # Log metrics
         self.log(rf'loss_style', style_loss.item(), prog_bar=step == 'train_model')
         self.log(rf'loss_content', content_loss.item(), prog_bar=step == 'train_model')
+        self.log(rf'ssim_loss', ssim_loss.item(), prog_bar=step == 'train_model')
         # print('loss_style', style_loss.item(),'------','loss_content', content_loss.item())
 
         # Return output only for validation step
         if step == 'val':
+
+            ##################
+            total_loss = content_loss + style_loss + identity_loss1 + identity_loss2
+            if not self._printed_val:
+                print(f"[VAL] total={total_loss.item():.4f} | "
+                      f"content={content_loss.item():.4f} | "
+                      f"style={style_loss.item():.4f} | "
+                      f"id1={identity_loss1.item():.4f} | "
+                      f"id2={identity_loss2.item():.4f}")
+                self._printed_val = True
+            ##################
+                
             self.validation_step_outputs.append({
-                'loss': content_loss + style_loss + identity_loss1 + identity_loss2,
+                'loss': content_loss + style_loss + identity_loss1 + identity_loss2 + ssim_loss,
                 'output': Ics,
                 'content': content,
                 'style': style
             })
 
             return {
-                'loss': content_loss + style_loss + identity_loss1 + identity_loss2,
+                'loss': content_loss + style_loss + identity_loss1 + identity_loss2 + ssim_loss,
                 'output': Ics,
             }
 
-        return content_loss + style_loss + identity_loss1 + identity_loss2
+        return content_loss + style_loss + identity_loss1 + identity_loss2 + ssim_loss
 
     def on_validation_epoch_end(self):
         outputs = self.validation_step_outputs
         if self.global_step == 0:
             return
+
+        ##################
+        self._printed_val = False
+        ##################
 
         with torch.no_grad():
             imgs = [x['output'] for x in outputs]
@@ -138,9 +167,9 @@ class LightningModel(pl.LightningModule):
             self.validation_step_outputs = []
 
     def loss(self, Ics, output_Icc, output_Iss, content, style):
-        content_loss, style_loss, id1_loss, id2_loss = self.loss_func(Ics, output_Icc, output_Iss, content, style)
+        content_loss, style_loss, id1_loss, id2_loss, loss_ssim = self.loss_func(Ics, output_Icc, output_Iss, content, style)
 
-        return self.content_weight * content_loss, self.style_weight * style_loss, self.lambda1 * id1_loss, self.lambda2 * id2_loss
+        return self.content_weight * content_loss, self.style_weight * style_loss, self.lambda1 * id1_loss, self.lambda2 * id2_loss, loss_ssim * self.ssim_weight
 
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=self.lr)

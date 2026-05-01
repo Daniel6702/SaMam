@@ -7,14 +7,14 @@ from ARCHI.VSSM import VSSM
 from ARCHI.SAVSSG import SAVSSG
 from ARCHI.Decoder import Decoder_NN, Decoder_NN_x4
 from ARCHI.LoE import LoE
-
+from torch.utils.checkpoint import checkpoint
 
 class SaMam(nn.Module):
     def __init__(self, nVSSMs=2,
                        nSAVSSMs=2,
                        nSAVSSGs=2,
                  embed_dim=256, patch_size=8, representation_dim=64,d_state=16,expand=2.,
-                 compress_ratio=8, squeeze_factor=8,mamba_from_trion=1):
+                 compress_ratio=8, squeeze_factor=8,mamba_from_trion=1,use_checkpoint=False):
         super().__init__()
 
         print('-----------init SaMam model-----------')
@@ -23,7 +23,7 @@ class SaMam(nn.Module):
         elif mamba_from_trion == 0:
             print("inference by torch, much more slower")
 
-
+        self.use_checkpoint = use_checkpoint
 
         content_encoder = [PatchEmbedNN(patch_size=patch_size, in_chans=3, embed_dim=embed_dim)]
         for _ in range(nVSSMs):
@@ -59,18 +59,28 @@ class SaMam(nn.Module):
             print('patch size should be 4 or 8')
             exit()
 
-
+    
     def forward(self, content, style):
-        content_f = self.content_encoder(content)
-        style_f = self.style_encoder(style)
+        # 1. Conditional check for encoders
+        if self.use_checkpoint and self.training:
+            content_f = checkpoint(self.content_encoder, content, use_reentrant=False)
+            style_f = checkpoint(self.style_encoder, style, use_reentrant=False)
+        else:
+            content_f = self.content_encoder(content)
+            style_f = self.style_encoder(style)
 
         style_embedding = self.global_embedder(style_f)
 
+        # 2. Conditional check for SAVSSGs layers
         res = content_f
         for i in range(self.nSAVSSGs):
-            res = self.SAVSSGs[i](res, style_embedding)
+            if self.use_checkpoint and self.training:
+                # We use a lambda to pass multiple arguments through the checkpoint
+                res = checkpoint(self.SAVSSGs[i], res, style_embedding, use_reentrant=False)
+            else:
+                res = self.SAVSSGs[i](res, style_embedding)
+                
         Ics = self.decoder(res)
-
         return Ics
 
 if __name__ == '__main__':
