@@ -152,8 +152,14 @@ class Integration_loss(nn.Module):
             loss_lambda1 = Ics.new_tensor(0.0)
             loss_lambda2 = Ics.new_tensor(0.0)
     
-        if self.apply_SSIM_loss:
-            loss_ssim = self.calc_ssim_loss(Ics, samples_c)
+        if self.apply_SSIM_loss:  
+            '''
+            SSIM loss is now applied to the identity paths instead of the (Ics, samples_c)
+            '''
+            loss_ssim = (
+                self.calc_ssim_loss(samples_cc, samples_c) +
+                self.calc_ssim_loss(samples_ss, samples_s)
+            )
         else:
             loss_ssim = Ics.new_tensor(0.0)
     
