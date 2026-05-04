@@ -103,58 +103,37 @@ class LightningModel(pl.LightningModule):
 
     def shared_step(self, batch, step):
         content, style = batch['content'], batch['style']
-        # print(content,style)
-
-        batch_size = content.shape[0]
-
-        Ics = []
-        
-        for i in range(0, batch_size):
-            content_i = content[i:i + 1, :, :, :]
-            style_i = style[i:i + 1, :, :, :]
-            output_i = self.model(content_i, style_i)
-            Ics.append(output_i)
-        Ics = torch.cat(Ics, 0)
-
-        output_Icc = []
-        output_Iss = []
-        '''
-        Attention: mamba by trion can not inject various style information in a batch to A,D directly. 
-        So we generate output stylized results one by one. This is similar to Gradient Accumulation.
-        '''
-        for i in range(0, batch_size):
-            content_i = content[i:i + 1, :, :, :]
-            Icc = self.model(content_i, content_i)
-            output_Icc.append(Icc)
-
-            style_i = style[i:i + 1, :, :, :]
-            Iss = self.model(style_i, style_i)
-            output_Iss.append(Iss)
-        output_Icc = torch.cat(output_Icc, 0)
-        output_Iss = torch.cat(output_Iss, 0)
-
-        content_loss, style_loss, identity_loss1, identity_loss2, ssim_loss = self.loss(Ics, output_Icc, output_Iss, content,
-                                                                             style)
-
+    
+        # Batched model calls.
+        # Requires SS2D_Decoder.forward_core_S7 to support batched style-dependent A/D.
+        Ics = self.model(content, style)
+        output_Icc = self.model(content, content)
+        output_Iss = self.model(style, style)
+    
+        content_loss, style_loss, identity_loss1, identity_loss2, ssim_loss = self.loss(
+            Ics,
+            output_Icc,
+            output_Iss,
+            content,
+            style,
+        )
+    
         self.log(rf'id_loss1', identity_loss1.item(), prog_bar=step == 'train_model')
         self.log(rf'id_loss2', identity_loss2.item(), prog_bar=step == 'train_model')
-
-        # Log metrics
+    
         self.log(rf'loss_style', style_loss.item(), prog_bar=step == 'train_model')
         self.log(rf'loss_content', content_loss.item(), prog_bar=step == 'train_model')
         self.log(rf'ssim_loss', ssim_loss.item(), prog_bar=step == 'train_model')
-        # print('loss_style', style_loss.item(),'------','loss_content', content_loss.item())
-
-        # Return output only for validation step
-        if step == 'val':    
-            total_loss = (
-                content_loss +
-                style_loss +
-                identity_loss1 +
-                identity_loss2 +
-                ssim_loss
-            )
-
+    
+        total_loss = (
+            content_loss +
+            style_loss +
+            identity_loss1 +
+            identity_loss2 +
+            ssim_loss
+        )
+    
+        if step == 'val':
             if self.trainer.is_global_zero and self.loss_log_file is not None:
                 self.val_loss_buffer.append({
                     "val_loss": total_loss.detach().cpu(),
@@ -164,9 +143,9 @@ class LightningModel(pl.LightningModule):
                     "id2": identity_loss2.detach().cpu(),
                     "ssim": ssim_loss.detach().cpu(),
                 })
-                
+    
                 self.pending_val_write = True
-        
+    
             # IMPORTANT: this is what EarlyStopping monitors
             self.log(
                 "val_loss",
@@ -174,9 +153,9 @@ class LightningModel(pl.LightningModule):
                 prog_bar=True,
                 on_step=False,
                 on_epoch=True,
-                sync_dist=False
+                sync_dist=False,
             )
-        
+    
             if not self._printed_val:
                 print(
                     f"[VAL] total={total_loss.item():.4f} | "
@@ -186,21 +165,21 @@ class LightningModel(pl.LightningModule):
                     f"id2={identity_loss2.item():.4f}"
                 )
                 self._printed_val = True
-                
+    
             self.validation_step_outputs.append({
                 'loss': total_loss,
                 'output': Ics,
                 'content': content,
-                'style': style
+                'style': style,
             })
-
+    
             return {
                 'loss': total_loss,
                 'output': Ics,
             }
-
-        return content_loss + style_loss + identity_loss1 + identity_loss2 + ssim_loss
-
+    
+        return total_loss
+    
     def on_validation_epoch_end(self):
         outputs = self.validation_step_outputs
         if self.global_step == 0:

@@ -30,6 +30,13 @@ import torch.nn.functional as F
 from PIL import Image
 from tqdm import tqdm
 
+import random, numpy as np
+
+seed = 0
+random.seed(seed)
+np.random.seed(seed)
+torch.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
 
 # -----------------------------------------------------------------------------
 # Resolve repo root so imports work regardless of where this file is placed/run.

@@ -141,32 +141,74 @@ class SS2D(nn.Module):
         K = 4
 
         x = x.view(B, C, -1).contiguous()
-        (o1, o2, o3, o4), (o1_inverse, o2_inverse, o3_inverse, o4_inverse), (d1, d2, d3, d4) = get_permute_order(H, W)
-        # # print(scan_order)
-        xs = torch.stack([x[:, :, o1], x[:, :, o2], x[:, :, o3], x[:, :, o4]], dim=1)
 
-        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs.view(B, K, -1, L), self.x_proj_weight)
-        dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
-        dts = torch.einsum("b k r l, k d r -> b k d l", dts.view(B, K, -1, L), self.dt_projs_weight)
-        xs = xs.float().view(B, -1, L)
-        dts = dts.contiguous().float().view(B, -1, L)  # (b, k * d, l)
-        Bs = Bs.float().view(B, K, -1, L)
-        Cs = Cs.float().view(B, K, -1, L)  # (b, k, d_state, l)
+        (
+            o1, o2, o3, o4
+        ), (
+            o1_inverse, o2_inverse, o3_inverse, o4_inverse
+        ), _ = get_permute_order(H, W)
 
-        # Ds = self.Ds.float().view(-1)
-        Ds = self.Ds_generate(representation).view(-1)
-        # As = -torch.exp(self.A_logs.float()).view(-1, self.d_state)
-        As = -torch.exp(self.A_logs_generate(representation).float()).view(-1, self.d_state)
+        xs = torch.stack(
+            [
+                x[:, :, o1],
+                x[:, :, o2],
+                x[:, :, o3],
+                x[:, :, o4],
+            ],
+            dim=1,
+        )  # [B, K, C, L]
 
-        dt_projs_bias = self.dt_projs_bias.float().view(-1)  # (k * d)
-        out_y = self.selective_scan(
-            xs, dts,
-            As, Bs, Cs, Ds, z=None,
-            delta_bias=dt_projs_bias,
-            delta_softplus=True,
-            return_last_state=False,
-        ).view(B, K, -1, L)
-        assert out_y.dtype == torch.float
+        x_dbl = torch.einsum(
+            "b k d l, k c d -> b k c l",
+            xs.view(B, K, -1, L),
+            self.x_proj_weight,
+        )
+
+        dts, Bs, Cs = torch.split(
+            x_dbl,
+            [self.dt_rank, self.d_state, self.d_state],
+            dim=2,
+        )
+
+        dts = torch.einsum(
+            "b k r l, k d r -> b k d l",
+            dts.view(B, K, -1, L),
+            self.dt_projs_weight,
+        )
+
+        xs = xs.float().view(B, K * C, L)
+        dts = dts.contiguous().float().view(B, K * C, L)
+
+        Bs = Bs.float().view(B, K, self.d_state, L)
+        Cs = Cs.float().view(B, K, self.d_state, L)
+
+        # Generate per-image, per-direction, per-channel A/D.
+        # Explicit views make the intended layout unambiguous:
+        # [B, K, C, d_state] -> [B * K * C, d_state]
+        As = self.A_logs_generate(representation).float()
+        As = As.view(B, K, C, self.d_state)
+        As = -torch.exp(As).contiguous().view(B * K * C, self.d_state)
+
+        Ds = self.Ds_generate(representation).float()
+        Ds = Ds.view(B, K, C).contiguous().view(B * K * C)
+
+        dt_projs_bias = self.dt_projs_bias.float().view(K * C)
+
+        out_y = self._selective_scan_with_batched_ad(
+            xs=xs,
+            dts=dts,
+            Bs=Bs,
+            Cs=Cs,
+            As=As,
+            Ds=Ds,
+            dt_projs_bias=dt_projs_bias,
+            batch_size=B,
+            num_directions=K,
+            d_inner=C,
+            seq_len=L,
+        )
+
+        assert out_y.dtype == torch.float32
 
         y1 = out_y[:, 0, :, o1_inverse]
         y2 = out_y[:, 1, :, o2_inverse]
@@ -196,3 +238,78 @@ class SS2D(nn.Module):
         # y = y * F.silu(z)
         out = self.out_proj(y)  # out: B,H,W,C
         return out
+
+
+    def _selective_scan_with_batched_ad(
+            self,
+            xs,
+            dts,
+            Bs,
+            Cs,
+            As,
+            Ds,
+            dt_projs_bias,
+            batch_size,
+            num_directions,
+            d_inner,
+            seq_len,
+    ):
+        """
+        Mamba/Triton selective_scan_fn does not accept A/D with an explicit batch
+        dimension. A and D are expected to be channel-wise.
+
+        We fold the original image batch into the scan channel/group dimension:
+
+            original:
+                xs: [B, K * D, L]
+                Bs: [B, K, N, L]
+                As: [B * K * D, N]
+
+            folded:
+                xs: [1, B * K * D, L]
+                Bs: [1, B * K, N, L]
+                As: [B * K * D, N]
+
+        This is exact because selective scan does not mix channels.
+        """
+
+        B = batch_size
+        K = num_directions
+        D = d_inner
+        L = seq_len
+
+        if B > 1:
+            xs_scan = xs.view(B, K, D, L).contiguous().view(1, B * K * D, L)
+            dts_scan = dts.view(B, K, D, L).contiguous().view(1, B * K * D, L)
+
+            Bs_scan = Bs.contiguous().view(1, B * K, self.d_state, L)
+            Cs_scan = Cs.contiguous().view(1, B * K, self.d_state, L)
+
+            dt_bias_scan = (
+                dt_projs_bias
+                .view(1, K * D)
+                .expand(B, K * D)
+                .reshape(-1)
+                .contiguous()
+            )
+        else:
+            xs_scan = xs
+            dts_scan = dts
+            Bs_scan = Bs
+            Cs_scan = Cs
+            dt_bias_scan = dt_projs_bias
+
+        out_y = self.selective_scan(
+            xs_scan,
+            dts_scan,
+            As,
+            Bs_scan,
+            Cs_scan,
+            Ds,
+            z=None,
+            delta_bias=dt_bias_scan,
+            delta_softplus=True,
+            return_last_state=False,
+        )
+
+        return out_y.view(B, K, D, L)
