@@ -115,6 +115,10 @@ def parse_args():
 
     # Add early stopping
     parser.add_argument('--early-stopping',action='store_true',help='Enable early stopping during training')
+
+    #loss log file path
+    parser.add_argument('--loss-log', type=str, default='./loss_logs/loss.txt',
+                        help='loss log path/filename.txt')
     
     return vars(parser.parse_args())
     

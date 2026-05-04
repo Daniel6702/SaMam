@@ -31,11 +31,12 @@ class LightningModel(pl.LightningModule):
                  apply_huber_loss=False,
                  apply_SSIM_loss=False,
                  apply_identity_loss=False,
+                 loss_log="./loss_logs/loss.txt",
                  **_):
         super().__init__()
         self.validation_step_outputs = []
         self.save_hyperparameters()
-
+        self.loss_log_file = None
         self.lr = lr
         self.style_weight = style_weight
         self.content_weight = content_weight
@@ -45,9 +46,14 @@ class LightningModel(pl.LightningModule):
         ##################
         self._printed_val = False
         ##################
-
+        
         # Style loss
         self.loss_func = Integration_loss(apply_huber_loss = apply_huber_loss, apply_SSIM_loss = apply_SSIM_loss, apply_identity_loss=apply_identity_loss)
+
+        self.val_loss_buffer = []
+        self.pending_val_write = False
+
+        self.loss_log = loss_log
 
         # Model
         self.model = SaMam(
@@ -66,10 +72,30 @@ class LightningModel(pl.LightningModule):
             use_checkpoint=low_vram
         )
 
+    def on_fit_start(self):
+        if not self.trainer.is_global_zero:
+            return
+    
+        log_dir = os.path.dirname(self.loss_log)
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
+    
+        self.loss_log_file = self.loss_log
+    
+        with open(self.loss_log_file, "w") as f:
+            f.write("step,val_loss,content,style,id1,id2,ssim\n")
+
+    def log_to_file(self, line: str):
+        if self.loss_log_file is None:
+            return
+        with open(self.loss_log_file, "a") as f:
+            f.write(line)
+            
     def forward(self, content, style):
         return self.model(content, style)
 
     def training_step(self, batch, batch_idx):
+        self.flush_validation_loss_log()
         return self.shared_step(batch, 'train_model')
 
     def validation_step(self, batch, batch_idx):
@@ -120,7 +146,7 @@ class LightningModel(pl.LightningModule):
         # print('loss_style', style_loss.item(),'------','loss_content', content_loss.item())
 
         # Return output only for validation step
-        if step == 'val':
+        if step == 'val':    
             total_loss = (
                 content_loss +
                 style_loss +
@@ -128,6 +154,18 @@ class LightningModel(pl.LightningModule):
                 identity_loss2 +
                 ssim_loss
             )
+
+            if self.trainer.is_global_zero and self.loss_log_file is not None:
+                self.val_loss_buffer.append({
+                    "val_loss": total_loss.detach().cpu(),
+                    "content": content_loss.detach().cpu(),
+                    "style": style_loss.detach().cpu(),
+                    "id1": identity_loss1.detach().cpu(),
+                    "id2": identity_loss2.detach().cpu(),
+                    "ssim": ssim_loss.detach().cpu(),
+                })
+                
+                self.pending_val_write = True
         
             # IMPORTANT: this is what EarlyStopping monitors
             self.log(
@@ -202,3 +240,41 @@ class LightningModel(pl.LightningModule):
                 "frequency": 1,
             },
         }
+    
+    def flush_validation_loss_log(self):
+        if not self.pending_val_write:
+            return
+    
+        if self.trainer.sanity_checking:
+            self.val_loss_buffer.clear()
+            self.pending_val_write = False
+            return
+    
+        if not self.trainer.is_global_zero:
+            self.val_loss_buffer.clear()
+            self.pending_val_write = False
+            return
+    
+        if self.loss_log_file is None or not self.val_loss_buffer:
+            self.val_loss_buffer.clear()
+            self.pending_val_write = False
+            return
+    
+        avg = {
+            k: mean([x[k].item() for x in self.val_loss_buffer])
+            for k in self.val_loss_buffer[0]
+        }
+    
+        with open(self.loss_log_file, "a") as f:
+            f.write(
+                f"{self.global_step},"
+                f"{avg['val_loss']:.6f},"
+                f"{avg['content']:.6f},"
+                f"{avg['style']:.6f},"
+                f"{avg['id1']:.6f},"
+                f"{avg['id2']:.6f},"
+                f"{avg['ssim']:.6f}\n"
+            )
+    
+        self.val_loss_buffer.clear()
+        self.pending_val_write = False
