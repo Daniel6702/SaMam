@@ -2,7 +2,6 @@ import argparse
 from argparse import ArgumentParser
 from pathlib import Path
 from pytorch_lightning.callbacks import EarlyStopping
-from pytorch_lightning.callbacks.early_stopping import EarlyStoppingReason
 import os
 
 project_root = os.path.abspath('..')
@@ -116,20 +115,26 @@ def parse_args():
 
     # Add early stopping
     parser.add_argument('--early-stopping',action='store_true',help='Enable early stopping during training')
-    parser.add_argument('--patience', type=int, default=5, help='Set the patience for early-stopping')
-    parser.add_argument('--delta', type=float, default=5, help='Set the minimum change for early-stopping')
-    
+    parser.add_argument('--patience', type=int, default=5)
+    parser.add_argument('--delta', type=float, default=5.0)
+
     #loss log file path
     parser.add_argument('--loss-log', type=str, default='./loss_logs/loss.txt',
                         help='loss log path/filename.txt')
+
+    #quiet
+    parser.add_argument('--quiet', action='store_true', help="quiet")
     
     return vars(parser.parse_args())
     
 
 if __name__ == '__main__':
     args = parse_args()
+
+    if args['quiet']:
+        print("quiet missing")
+    
     gpus = []
-    callbacks = []
     for i in args['gpus']:
         gpus.append(int(i))
 
@@ -144,22 +149,21 @@ if __name__ == '__main__':
 
     datamodule = DataModule(**args)        
     logger = TensorBoardImageLogger(args['log_dir'], name='logs')
+    lr_monitor = LearningRateMonitor(logging_interval='step')
     
-    callbacks.append(
-        LearningRateMonitor(logging_interval='step')
-    )
+    early_stop = None
 
-    # If early stopping is enabled add it to the list of callbacks
-    early_stopping = None
     if args['early_stopping']:
-        early_stopping = EarlyStopping(
+        early_stop = EarlyStopping(
             monitor="val_loss",
             min_delta=args['delta'],
             patience=args['patience'],
             mode="min",
             verbose=True
         )
-        callbacks.append(early_stopping)
+    callbacks = [lr_monitor]
+    if early_stop is not None:
+        callbacks.append(early_stop)
     
     trainer = Trainer(
         accelerator="gpu",
@@ -174,21 +178,5 @@ if __name__ == '__main__':
     )
 
     trainer.fit(model, datamodule=datamodule)
-
-    # Print reason for early stopping
-    if args['early_stopping']:
-        # Check why training stopped
-        if early_stopping.stopping_reason == EarlyStoppingReason.PATIENCE_EXHAUSTED:
-            print("Training stopped due to patience exhaustion")
-        elif early_stopping.stopping_reason == EarlyStoppingReason.STOPPING_THRESHOLD:
-            print("Training stopped due to reaching stopping threshold")
-        elif early_stopping.stopping_reason == EarlyStoppingReason.NOT_STOPPED:
-            print("Training completed normally without early stopping")
-        
-        # Access human-readable message
-        if early_stopping.stopping_reason_message:
-            print(f"Details: {early_stopping.stopping_reason_message}")     
-
-    
     output = args["output"]
     trainer.save_checkpoint(output)

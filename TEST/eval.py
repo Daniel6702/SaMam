@@ -2,20 +2,8 @@
 """
 One-shot evaluation script for SaMam-style checkpoints using the StyleID protocol.
 
-What it does:
-1. Loads the checkpoint you pass in.
-2. Uses the fixed eval content/style folders.
-3. Selects the first N_CONTENT_EVAL content images and first N_STYLE_EVAL style images.
-4. Builds the Cartesian product of those subsets:
-       every content x every style
-   so total pairs = N_CONTENT_EVAL * N_STYLE_EVAL.
-5. Writes temporary prepared content/style/output folders with strict 1:1:1 aligned filenames,
-   which is what StyleID's evaluation script expects.
-6. Runs StyleID's full `evaluation/eval_artfid.py` on those folders.
-7. Prints the metrics from StyleID eval_artfid.py and cleans up the temporary files.
-
 Usage:
-    python eval_artfid.py /path/to/model.ckpt
+    python eval_artfid.py --checkpoint /path/to/model.ckpt --output /path/to/results.txt
 """
 
 import argparse
@@ -38,6 +26,10 @@ np.random.seed(seed)
 torch.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)
 
+torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.deterministic = True
+torch.use_deterministic_algorithms(True, warn_only=True)
+
 # -----------------------------------------------------------------------------
 # Resolve repo root so imports work regardless of where this file is placed/run.
 # -----------------------------------------------------------------------------
@@ -54,11 +46,9 @@ def find_repo_root() -> Path:
             continue
         seen.add(candidate)
 
-        # Case 1: this directory is already the SaMam repo root
         if all((candidate / part).exists() for part in ("TEST", "TRAIN", "MODEL")):
             return candidate
 
-        # Case 2: running from a parent directory containing ComputerVisionProject/SaMam
         nested = candidate / "ComputerVisionProject" / "SaMam"
         if all((nested / part).exists() for part in ("TEST", "TRAIN", "MODEL")):
             return nested
@@ -79,15 +69,11 @@ from TRAIN.lightning_module.lightningmodel import LightningModel  # noqa: E402
 STYLEID_ROOT = REPO_ROOT / "external" / "StyleID"
 STYLEID_EVAL_SCRIPT = STYLEID_ROOT / "evaluation" / "eval_artfid.py"
 
-# -----------------------------------------------------------------------------
-# Fixed eval directories (only checkpoint is passed as CLI input)
-# -----------------------------------------------------------------------------
-
 CONTENT_DIR = REPO_ROOT / "TEST" / "eval" / "content"
 STYLE_DIR = REPO_ROOT / "TEST" / "eval" / "style"
 
 SAMAM_DEVICE = "cuda:0"
-EVAL_DEVICE = "cuda"  # if insufficient VRAM, change to "cpu"
+EVAL_DEVICE = "cuda"
 
 DEFAULT_STYLE_SIZE = 256
 DEFAULT_MODEL_ARGS = {
@@ -104,20 +90,13 @@ DEFAULT_MODEL_ARGS = {
     "mamba_from_trion": 1,
 }
 
-# -----------------------------------------------------------------------------
-# StyleID protocol constants
-# -----------------------------------------------------------------------------
-# These are the only numbers you should change to alter the benchmark size.
-# Total evaluated stylizations = N_CONTENT_EVAL * N_STYLE_EVAL.
 N_CONTENT_EVAL = 20
 N_STYLE_EVAL = 40
 
-# StyleID eval settings
 STYLEID_BATCH_SIZE = 1
 STYLEID_NUM_WORKERS = 8
 STYLEID_CONTENT_METRIC = "lpips"
 STYLEID_MODE = "art_fid_inf"
-
 
 # -----------------------------------------------------------------------------
 # Helpers
@@ -126,20 +105,27 @@ STYLEID_MODE = "art_fid_inf"
 def parse_args():
     parser = argparse.ArgumentParser(
         description=(
-            "Run StyleID-protocol stylization eval (Cartesian product of selected "
-            "content/style subsets) and then call StyleID's eval_artfid.py."
+            "Run StyleID-protocol stylization eval using a SaMam checkpoint "
+            "and save the resulting metrics to an output file."
         )
     )
     parser.add_argument(
-        "model_ckpt",
+        "--checkpoint",
+        required=True,
         type=str,
         help="Path to the model checkpoint (.ckpt).",
+    )
+    parser.add_argument(
+        "--output",
+        required=True,
+        type=str,
+        help="Path to the output text file where metrics will be saved.",
     )
     return parser.parse_args()
 
 
 def list_files(directory: Path):
-    files = [p for p in test_utils.files_in(directory) if p.is_file()]
+    files = sorted([p for p in test_utils.files_in(directory) if p.is_file()])
     if not files:
         raise FileNotFoundError(f"No files found in: {directory}")
     return files
@@ -165,10 +151,8 @@ def stylize_image(model, content_file: Path, style_file: Path, style_size: int):
     output = model(content, style)
     output = output.detach().cpu()
 
-    # Free GPU tensors before any resize work
     del content, style
 
-    # Keep eval alignment with content image resolution
     if output.shape[-2:] != target_size:
         output = F.interpolate(
             output,
@@ -181,14 +165,8 @@ def stylize_image(model, content_file: Path, style_file: Path, style_size: int):
 
 
 def load_model(ckpt_path: Path, device: torch.device):
-    """
-    Supports both checkpoint-loading paths implied by your original test script:
-    1. LightningModel.load_from_checkpoint(...)
-    2. Manual load of checkpoint['state_dict'] into LightningModel(...).model
-    """
     ckpt_path = ckpt_path.resolve()
 
-    # First try the direct Lightning restore path.
     try:
         model = LightningModel.load_from_checkpoint(
             checkpoint_path=str(ckpt_path),
@@ -260,7 +238,7 @@ def run_styleid_eval(
     content_dir: Path,
     output_dir: Path,
     device_str: str,
-    ckpt_path: Path,
+    output_path: Path,
 ):
     if not STYLEID_EVAL_SCRIPT.exists():
         raise FileNotFoundError(
@@ -310,7 +288,6 @@ def run_styleid_eval(
         text=True,
     )
 
-    # Print subprocess output so behavior stays the same
     if result.stdout:
         print(result.stdout, end="")
     if result.stderr:
@@ -321,7 +298,6 @@ def run_styleid_eval(
             f"StyleID eval_artfid.py failed with exit code {result.returncode}"
         )
 
-    # Extract metric lines
     metric_lines = []
     for line in result.stdout.splitlines():
         stripped = line.strip()
@@ -334,11 +310,12 @@ def run_styleid_eval(
 
     metrics_text = "\n".join(metric_lines)
 
-    # Save next to checkpoint, using checkpoint name
-    txt_path = ckpt_path.with_suffix(".txt")
-    txt_path.write_text(metrics_text + "\n", encoding="utf-8")
+    output_path = output_path.resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(metrics_text + "\n", encoding="utf-8")
 
-    print(f"\nSaved metrics to: {txt_path}")
+    print(f"\nSaved metrics to: {output_path}")
+
 
 def select_eval_subset(files, n_required: int, label: str):
     if len(files) < n_required:
@@ -350,11 +327,6 @@ def select_eval_subset(files, n_required: int, label: str):
 
 
 def build_eval_pairs(content_files, style_files):
-    """
-    Build the StyleID-style Cartesian product benchmark:
-        [(c0, s0), (c0, s1), ..., (c0, sM-1),
-         (c1, s0), (c1, s1), ..., (cN-1, sM-1)]
-    """
     pairs = []
     for content_file in content_files:
         for style_file in style_files:
@@ -368,7 +340,9 @@ def build_eval_pairs(content_files, style_files):
 
 def main():
     args = parse_args()
-    ckpt_path = Path(args.model_ckpt)
+
+    ckpt_path = Path(args.checkpoint)
+    output_path = Path(args.output)
 
     if not ckpt_path.exists():
         raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
@@ -394,6 +368,7 @@ def main():
 
     print(f"Repo root         : {REPO_ROOT}")
     print(f"Checkpoint        : {ckpt_path.resolve()}")
+    print(f"Output file       : {output_path.resolve()}")
     print(f"Content dir       : {CONTENT_DIR}")
     print(f"Style dir         : {STYLE_DIR}")
     print(f"Selected contents : {len(selected_content_files)}")
@@ -418,18 +393,15 @@ def main():
         prepared_style_dir.mkdir(parents=True, exist_ok=True)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        # Materialize the Cartesian product into 1:1-aligned content/style folders.
         print("\nPreparing temporary eval inputs (Cartesian product benchmark)...")
-        for idx, (content_src, style_src) in enumerate(
-            tqdm(eval_pairs, total=num_pairs, desc="Preparing")
-        ):
+        for idx, (content_src, style_src) in enumerate(eval_pairs):
             filename = f"{idx:04d}.png"
             save_as_png(content_src, prepared_content_dir / filename)
             save_as_png(style_src, prepared_style_dir / filename)
 
         print("\nGenerating stylized outputs...")
         with torch.inference_mode():
-            for idx in tqdm(range(num_pairs), desc="Stylizing"):
+            for idx in range(num_pairs):
                 filename = f"{idx:04d}.png"
                 content_file = prepared_content_dir / filename
                 style_file = prepared_style_dir / filename
@@ -454,13 +426,12 @@ def main():
             torch.cuda.empty_cache()
             torch.cuda.ipc_collect()
 
-        # Run full StyleID evaluation script (ArtFID + CFSD)
         run_styleid_eval(
             style_dir=prepared_style_dir,
             content_dir=prepared_content_dir,
             output_dir=output_dir,
             device_str=styleid_device,
-            ckpt_path=ckpt_path,
+            output_path=output_path,
         )
 
         print("\nEvaluation complete.")

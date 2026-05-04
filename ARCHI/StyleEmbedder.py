@@ -37,9 +37,9 @@ class GlobalStyleEncoder(nn.Module):
             ys = self.downscale2(ys)
 
         if ys.shape[2] != 4 or ys.shape[3] != 4:
-            print("----------------------------")
-            print("now in style embedder style feature size is: ","(",ys.shape[2],",",ys.shape[3],")", "resize to", "(",4,",",4,")")
-            print("----------------------------")
+            # print("----------------------------")
+            # print("now in style embedder style feature size is: ","(",ys.shape[2],",",ys.shape[3],")", "resize to", "(",4,",",4,")")
+            # print("----------------------------")
             ys = self.globalPooling(ys)
         ys = ys.reshape(len(xs), -1)
         w = self.fc(ys)
