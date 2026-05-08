@@ -1,0 +1,101 @@
+quiet missing
+-----------init SaMam model-----------
+inference by mamba-ssm, quick
+upsample: 8
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/lightning_fabric/plugins/environments/slurm.py:204: The `srun` command is available on your system but is not used. HINT: If your intention is to run Lightning on SLURM, prepend your python command with `srun` like so: srun python ./TRAIN/train_SaMam.py --content ./TRAIN/Dataset/MS_ ...
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+┏━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━┳━━━━━━━┓
+┃   ┃ Name      ┃ Type             ┃ Params ┃ Mode  ┃ FLOPs ┃
+┡━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━╇━━━━━━━┩
+│ 0 │ loss_func │ Integration_loss │ 12.9 M │ train │     0 │
+│ 1 │ model     │ SaMam            │ 19.8 M │ train │     0 │
+└───┴───────────┴──────────────────┴────────┴───────┴───────┘
+Trainable params: 19.8 M                                                                                                                                                                                                                                               
+Non-trainable params: 12.9 M                                                                                                                                                                                                                                           
+Total params: 32.7 M                                                                                                                                                                                                                                                   
+Total estimated model params size (MB): 130                                                                                                                                                                                                                            
+Modules in train mode: 365                                                                                                                                                                                                                                             
+Modules in eval mode: 0                                                                                                                                                                                                                                                
+Total FLOPs: 0                                                                                                                                                                                                                                                         
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:434: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` 
+argument` to `num_workers=7` in the `DataLoader` to improve performance.
+[VAL] total=206.4937 | content=14.4848 | style=192.0088 | id1=0.0000 | id2=0.0000
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/utils/data/dataloader.py:558: UserWarning: This DataLoader will create 12 worker processes in total. Our suggested max number of worker in current system is 8, which is smaller than
+what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+Epoch 0/0  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 250/-- 0:11:27 • -:--:-- 0.37it/s v_num: 58.000 id_loss1: 0.000 id_loss2: 0.000 loss_style: 95.677 loss_content: 23.816 ssim_loss: 0.000Metric val_loss improved. New best score: 117.943
+[VAL] total=71.1117 | content=23.3255 | style=47.7861 | id1=0.0000 | id2=0.0000
+Epoch 0/0  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 500/-- 0:22:43 • -:--:-- 0.37it/s v_num: 58.000 id_loss1: 0.000 id_loss2: 0.000 loss_style: 56.436 loss_content: 23.742 ssim_loss: 0.000 val_loss: 117.943Metric val_loss improved by 16.522 >= min_delta = 5.0. New best score: 101.421
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (86 bytes not processed)
+        Files: [TRAIN/Dataset/MS_COCO/train2017/000000326731.jpg, TRAIN/Dataset/wikiart/train/91033.jpg]
+[VAL] total=68.7862 | content=22.6502 | style=46.1361 | id1=0.0000 | id2=0.0000
+[VAL] total=68.2140 | content=22.4854 | style=45.7286 | id1=0.0000 | id2=0.0000
+Epoch 0/0  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1000/-- 0:45:03 • -:--:-- 0.40it/s v_num: 58.000 id_loss1: 0.000 id_loss2: 0.000 loss_style: 28.117 loss_content: 22.028 ssim_loss: 0.000 val_loss: 97.257Metric val_loss improved by 20.573 >= min_delta = 5.0. New best score: 80.847
+[VAL] total=62.4797 | content=22.3946 | style=40.0851 | id1=0.0000 | id2=0.0000
+Epoch 0/0  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1250/-- 0:56:28 • -:--:-- 0.37it/s v_num: 58.000 id_loss1: 0.000 id_loss2: 0.000 loss_style: 24.516 loss_content: 21.172 ssim_loss: 0.000 val_loss: 80.847Metric val_loss improved by 13.323 >= min_delta = 5.0. New best score: 67.524
+[VAL] total=57.7166 | content=21.8213 | style=35.8953 | id1=0.0000 | id2=0.0000
+[VAL] total=61.9266 | content=21.8691 | style=40.0575 | id1=0.0000 | id2=0.0000
+[VAL] total=54.6591 | content=21.3173 | style=33.3418 | id1=0.0000 | id2=0.0000
+Epoch 0/0  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2000/-- 1:30:25 • -:--:-- 0.40it/s v_num: 58.000 id_loss1: 0.000 id_loss2: 0.000 loss_style: 27.140 loss_content: 19.968 ssim_loss: 0.000 val_loss: 65.167Metric val_loss improved by 5.227 >= min_delta = 5.0. New best score: 62.297
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (0 bytes not processed)
+        Files: [TRAIN/Dataset/MS_COCO/train2017/000000118186.jpg, TRAIN/Dataset/wikiart/train/95347.jpg]
+[VAL] total=59.8608 | content=21.2400 | style=38.6208 | id1=0.0000 | id2=0.0000
+[VAL] total=61.1889 | content=23.0659 | style=38.1230 | id1=0.0000 | id2=0.0000
+[VAL] total=55.8366 | content=21.1644 | style=34.6722 | id1=0.0000 | id2=0.0000
+[VAL] total=64.6660 | content=21.6792 | style=42.9868 | id1=0.0000 | id2=0.0000
+[VAL] total=66.4595 | content=21.3022 | style=45.1574 | id1=0.0000 | id2=0.0000
+Epoch 0/0  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3250/-- 2:26:44 • -:--:-- 0.39it/s v_num: 58.000 id_loss1: 0.000 id_loss2: 0.000 loss_style: 38.849 loss_content: 20.792 ssim_loss: 0.000 val_loss: 68.549Monitored metric val_loss did not improve in the last 5 records. Best score: 62.297. Signaling Trainer to stop.
+`Trainer.fit` stopped: `max_epochs=1` reached.
+Epoch 0/0  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3250/-- 2:26:46 • -:--:-- 0.39it/s v_num: 58.000 id_loss1: 0.000 id_loss2: 0.000 loss_style: 38.849 loss_content: 20.792 ssim_loss: 0.000 val_loss: 68.848
+`weights_only` was not set, defaulting to `False`.
+Repo root         : /home/austen/ComputerVisionProject/SaMam
+Checkpoint        : /home/austen/ComputerVisionProject/SaMam/OUTPUT/ps8_lr2e-04_bs8_it50k_id0_es1_hb0_ssim0_ssim_w2_20260505_000704/checkpoint.ckpt
+Output file       : /home/austen/ComputerVisionProject/SaMam/OUTPUT/ps8_lr2e-04_bs8_it50k_id0_es1_hb0_ssim0_ssim_w2_20260505_000704/evaluation.txt
+Content dir       : /home/austen/ComputerVisionProject/SaMam/TEST/eval/content
+Style dir         : /home/austen/ComputerVisionProject/SaMam/TEST/eval/style
+Selected contents : 20
+Selected styles   : 40
+Total pairs       : 800 (= 20 x 40)
+SaMam device      : cuda:0
+Eval device       : cuda
+-----------init SaMam model-----------
+inference by mamba-ssm, quick
+upsample: 8
+
+Preparing temporary eval inputs (Cartesian product benchmark)...
+
+Generating stylized outputs...
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/linear.py:116: UserWarning: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility (Triggered internally at ../aten/src/ATen/Context.cpp:185.)
+  return F.linear(input, self.weight, self.bias)
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/functional.py:385: UserWarning: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility (Triggered internally at ../aten/src/ATen/Context.cpp:185.)
+  return _VF.einsum(equation, operands)  # type: ignore[attr-defined]
+
+Running StyleID evaluation:
+/home/austen/ComputerVisionProject/SaMam/.venv/bin/python -u /home/austen/ComputerVisionProject/SaMam/external/StyleID/evaluation/eval_artfid.py --batch_size 1 --num_workers 8 --content_metric lpips --mode art_fid_inf --device cuda --sty /tmp/artfid_eval_kn_g0wk6/style --cnt /tmp/artfid_eval_kn_g0wk6/content --tar /tmp/artfid_eval_kn_g0wk6/output
+
+Compute FID value...
+Compute content distance...
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+Loading model from: /home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/lpips/weights/v0.1/alex.pth
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+Loading model from: /home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/lpips/weights/v0.1/alex.pth
+Compute CFSD value...
+ArtFID: 30.083324432373047 FID: 17.188967081433574 LPIPS: 0.6539326310157776 LPIPS_gray: 0.530113160610199
+CFSD: 0.3709
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=AlexNet_Weights.IMAGENET1K_V1`. You can also use `weights=AlexNet_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=VGG19_Weights.IMAGENET1K_V1`. You can also use `weights=VGG19_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+
+Saved metrics to: /home/austen/ComputerVisionProject/SaMam/OUTPUT/ps8_lr2e-04_bs8_it50k_id0_es1_hb0_ssim0_ssim_w2_20260505_000704/evaluation.txt
+
+Evaluation complete.
+DONE

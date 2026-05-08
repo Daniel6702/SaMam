@@ -1,0 +1,90 @@
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/lightning_fabric/plugins/environments/slurm.py:204: The `srun` command is available on your system but is not used. HINT: If your intention is to run Lightning on SLURM, prepend your python command with `srun` like so: srun python ./TRAIN/train_SaMam.py --content ./TRAIN/Dataset/MS_ ...
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/callbacks/model_checkpoint.py:881: Checkpoint directory /home/austen/ComputerVisionProject/SaMam/OUTPUT/ps8_lr2e-04_bs8_it4k_id1_es0_hb1_ssim0_ssimW2_20260506_192144 exists and is not empty.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+quiet missing
+-----------init SaMam model-----------
+inference by mamba-ssm, quick
+upsample: 8
+┏━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━┳━━━━━━━┓
+┃   ┃ Name      ┃ Type             ┃ Params ┃ Mode  ┃ FLOPs ┃
+┡━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━╇━━━━━━━┩
+│ 0 │ loss_func │ Integration_loss │ 12.9 M │ train │     0 │
+│ 1 │ model     │ SaMam            │ 19.8 M │ train │     0 │
+└───┴───────────┴──────────────────┴────────┴───────┴───────┘
+Trainable params: 19.8 M                                                                                                                                                                                            
+Non-trainable params: 12.9 M                                                                                                                                                                                        
+Total params: 32.7 M                                                                                                                                                                                                
+Total estimated model params size (MB): 130                                                                                                                                                                         
+Modules in train mode: 365                                                                                                                                                                                          
+Modules in eval mode: 0                                                                                                                                                                                             
+Total FLOPs: 0                                                                                                                                                                                                      
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:434: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=35` in the `DataLoader` to improve performance.
+[VAL] total=112.5816 | content=14.3288 | style=63.9566 | id1=24.2276 | id2=10.0685
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (0 bytes not processed)
+	Files: [TRAIN/Dataset/MS_COCO/train2017/000000408779.jpg, TRAIN/Dataset/wikiart/train/95347.jpg]
+`Trainer.fit` stopped: `max_steps=4000` reached.
+[VAL] total=91.0924 | content=13.9756 | style=62.4557 | id1=5.5371 | id2=9.1240
+[VAL] total=90.8460 | content=13.8912 | style=62.5854 | id1=5.3376 | id2=9.0318
+[VAL] total=90.6509 | content=14.1407 | style=62.9405 | id1=4.7424 | id2=8.8273
+[VAL] total=90.9414 | content=13.8741 | style=63.0875 | id1=5.0409 | id2=8.9389
+[VAL] total=91.4125 | content=14.1148 | style=63.2875 | id1=5.0760 | id2=8.9342
+[VAL] total=90.8359 | content=13.8941 | style=62.5199 | id1=5.3775 | id2=9.0444
+[VAL] total=89.2743 | content=14.0719 | style=61.3547 | id1=5.0489 | id2=8.7988
+[VAL] total=90.1369 | content=13.8733 | style=62.1707 | id1=5.1167 | id2=8.9762
+[VAL] total=90.8094 | content=13.8770 | style=62.3349 | id1=5.5308 | id2=9.0667
+[VAL] total=90.5665 | content=13.9776 | style=62.5718 | id1=5.0784 | id2=8.9387
+[VAL] total=91.3468 | content=13.9308 | style=62.8563 | id1=5.5473 | id2=9.0125
+[VAL] total=92.0806 | content=14.2862 | style=63.6028 | id1=5.2660 | id2=8.9257
+[VAL] total=91.0107 | content=13.9649 | style=62.4965 | id1=5.4748 | id2=9.0745
+[VAL] total=91.2508 | content=13.9181 | style=62.5685 | id1=5.6438 | id2=9.1204
+[VAL] total=90.9526 | content=14.1024 | style=62.2313 | id1=5.5865 | id2=9.0325
+Epoch 0/0  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4000/-- 0:59:58 • -:--:-- 1.13it/s v_num: 66.000 id_loss1: 3.464 id_loss2: 6.219 loss_style: 44.072 loss_content: 14.175 ssim_loss: 0.000 val_loss: 90.835
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/linear.py:116: UserWarning: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility (Triggered internally at ../aten/src/ATen/Context.cpp:185.)
+  return F.linear(input, self.weight, self.bias)
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/functional.py:385: UserWarning: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility (Triggered internally at ../aten/src/ATen/Context.cpp:185.)
+  return _VF.einsum(equation, operands)  # type: ignore[attr-defined]
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=AlexNet_Weights.IMAGENET1K_V1`. You can also use `weights=AlexNet_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=VGG19_Weights.IMAGENET1K_V1`. You can also use `weights=VGG19_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+Repo root         : /home/austen/ComputerVisionProject/SaMam
+Checkpoint        : /home/austen/ComputerVisionProject/SaMam/OUTPUT/ps8_lr2e-04_bs8_it4k_id1_es0_hb1_ssim0_ssimW2_20260506_192144/checkpoint.ckpt
+Output file       : /home/austen/ComputerVisionProject/SaMam/OUTPUT/ps8_lr2e-04_bs8_it4k_id1_es0_hb1_ssim0_ssimW2_20260506_192144/evaluation.txt
+Content dir       : /home/austen/ComputerVisionProject/SaMam/TEST/eval/content
+Style dir         : /home/austen/ComputerVisionProject/SaMam/TEST/eval/style
+Selected contents : 20
+Selected styles   : 40
+Total pairs       : 800 (= 20 x 40)
+SaMam device      : cuda:0
+Eval device       : cuda
+-----------init SaMam model-----------
+inference by mamba-ssm, quick
+upsample: 8
+
+Preparing temporary eval inputs (Cartesian product benchmark)...
+
+Generating stylized outputs...
+
+Running StyleID evaluation:
+/home/austen/ComputerVisionProject/SaMam/.venv/bin/python -u /home/austen/ComputerVisionProject/SaMam/external/StyleID/evaluation/eval_artfid.py --batch_size 1 --num_workers 8 --content_metric lpips --mode art_fid_inf --device cuda --sty /tmp/artfid_eval_3we2nupr/style --cnt /tmp/artfid_eval_3we2nupr/content --tar /tmp/artfid_eval_3we2nupr/output
+
+Compute FID value...
+Compute content distance...
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+Loading model from: /home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/lpips/weights/v0.1/alex.pth
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+Loading model from: /home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/lpips/weights/v0.1/alex.pth
+Compute CFSD value...
+ArtFID: 91.88613891601562 FID: 45.40198040190489 LPIPS: 0.9802200198173523 LPIPS_gray: 0.850688099861145
+CFSD: 0.3306
+
+Saved metrics to: /home/austen/ComputerVisionProject/SaMam/OUTPUT/ps8_lr2e-04_bs8_it4k_id1_es0_hb1_ssim0_ssimW2_20260506_192144/evaluation.txt
+
+Evaluation complete.
+DONE

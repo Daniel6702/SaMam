@@ -1,7 +1,7 @@
 import argparse
 from argparse import ArgumentParser
 from pathlib import Path
-from pytorch_lightning.callbacks import EarlyStopping
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 import os
 
 project_root = os.path.abspath('..')
@@ -18,6 +18,10 @@ from TRAIN.lightning_module import dataset
 from TRAIN.lightning_module.datamodule import DataModule
 from TRAIN.lightning_module.lightningmodel import LightningModel
 
+import time
+import json
+from datetime import datetime
+from pytorch_lightning.callbacks import Callback
 
 # torch.backends.cudnn.enabled = False
 torch.backends.cudnn.benchmark = True
@@ -42,6 +46,72 @@ class TensorBoardImageLogger(TensorBoardLogger):
 
         file = dir.joinpath(f'{tag}_{global_step:09}.jpg')
         dataset.save(img_tensor, file)
+        
+class TrainingTimeLogger(Callback):
+    def __init__(self, output_file):
+        super().__init__()
+        self.output_file = output_file
+        self.start_time = None
+        self.start_global_step = 0
+
+    def on_train_start(self, trainer, pl_module):
+        # Synchronize so GPU work before timing is completed.
+        if torch.cuda.is_available():
+            torch.cuda.synchronize()
+
+        self.start_time = time.perf_counter()
+        self.start_global_step = int(trainer.global_step)
+
+    def on_train_end(self, trainer, pl_module):
+        if torch.cuda.is_available():
+            torch.cuda.synchronize()
+
+        end_time = time.perf_counter()
+        elapsed_seconds = end_time - self.start_time
+
+        end_global_step = int(trainer.global_step)
+        iterations_this_run = end_global_step - self.start_global_step
+
+        iterations_per_second = (
+            iterations_this_run / elapsed_seconds
+            if elapsed_seconds > 0
+            else 0.0
+        )
+
+        result = {
+            "finished_at": datetime.now().isoformat(timespec="seconds"),
+            "elapsed_seconds": elapsed_seconds,
+            "elapsed_minutes": elapsed_seconds / 60.0,
+            "elapsed_hours": elapsed_seconds / 3600.0,
+            "start_global_step": self.start_global_step,
+            "end_global_step": end_global_step,
+            "iterations_this_run": iterations_this_run,
+            "max_steps": trainer.max_steps,
+            "iterations_per_second": iterations_per_second,
+            "seconds_per_iteration": (
+                elapsed_seconds / iterations_this_run
+                if iterations_this_run > 0
+                else None
+            ),
+        }
+
+        output_dir = os.path.dirname(self.output_file)
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
+
+        with open(self.output_file, "w") as f:
+            json.dump(result, f, indent=4)
+
+        print("\n========== Training Time Summary ==========")
+        print(f"Elapsed time: {elapsed_seconds:.2f} seconds")
+        print(f"Elapsed time: {elapsed_seconds / 60.0:.2f} minutes")
+        print(f"Iterations this run: {iterations_this_run}")
+        print(f"End global step: {end_global_step}")
+        print(f"Iterations/sec: {iterations_per_second:.4f}")
+        if iterations_this_run > 0:
+            print(f"Seconds/iteration: {elapsed_seconds / iterations_this_run:.4f}")
+        print(f"Saved to: {self.output_file}")
+        print("===========================================\n")
 
 
 def parse_args():
@@ -115,8 +185,8 @@ def parse_args():
 
     # Add early stopping
     parser.add_argument('--early-stopping',action='store_true',help='Enable early stopping during training')
-    parser.add_argument('--patience', type=int, default=5)
-    parser.add_argument('--delta', type=float, default=5.0)
+    parser.add_argument('--patience', type=int, default=8)
+    parser.add_argument('--delta', type=float, default=4.0)
 
     #loss log file path
     parser.add_argument('--loss-log', type=str, default='./loss_logs/loss.txt',
@@ -124,6 +194,13 @@ def parse_args():
 
     #quiet
     parser.add_argument('--quiet', action='store_true', help="quiet")
+
+    parser.add_argument(
+        '--time-log',
+        type=str,
+        default='./loss_logs/training_time.json',
+        help='Path to save training time, iterations, and iterations/sec.'
+    )
     
     return vars(parser.parse_args())
     
@@ -150,6 +227,18 @@ if __name__ == '__main__':
     datamodule = DataModule(**args)        
     logger = TensorBoardImageLogger(args['log_dir'], name='logs')
     lr_monitor = LearningRateMonitor(logging_interval='step')
+
+    #######
+    checkpoint_cb = ModelCheckpoint(
+        dirpath=os.path.dirname(args["output"]),
+        filename=Path(args["output"]).stem,   # "checkpoint"
+        monitor="val_loss",
+        mode="min",
+        save_top_k=1,
+        save_last=False,
+        auto_insert_metric_name=False,
+    )
+    ######
     
     early_stop = None
 
@@ -161,7 +250,11 @@ if __name__ == '__main__':
             mode="min",
             verbose=True
         )
-    callbacks = [lr_monitor]
+        
+    time_logger = TrainingTimeLogger(args['time_log'])
+
+    callbacks = [lr_monitor, checkpoint_cb, time_logger]
+    
     if early_stop is not None:
         callbacks.append(early_stop)
     
@@ -178,5 +271,5 @@ if __name__ == '__main__':
     )
 
     trainer.fit(model, datamodule=datamodule)
-    output = args["output"]
-    trainer.save_checkpoint(output)
+    #output = args["output"]
+    #trainer.save_checkpoint(output)

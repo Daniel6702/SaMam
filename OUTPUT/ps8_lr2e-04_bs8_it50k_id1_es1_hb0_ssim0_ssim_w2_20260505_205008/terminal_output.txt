@@ -1,0 +1,141 @@
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/lightning_fabric/plugins/environments/slurm.py:204: The `srun` command is available on your system but is not used. HINT: If your intention is to run Lightning on SLURM, prepend your python command with `srun` like so: srun python ./TRAIN/train_SaMam.py --content ./TRAIN/Dataset/MS_ ...
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+💡 Tip: For seamless cloud uploads and versioning, try installing [litmodels](https://pypi.org/project/litmodels/) to enable LitModelCheckpoint, which syncs automatically with the Lightning model registry.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+quiet missing
+-----------init SaMam model-----------
+inference by mamba-ssm, quick
+upsample: 8
+┏━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━┳━━━━━━━┓
+┃   ┃ Name      ┃ Type             ┃ Params ┃ Mode  ┃ FLOPs ┃
+┡━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━╇━━━━━━━┩
+│ 0 │ loss_func │ Integration_loss │ 12.9 M │ train │     0 │
+│ 1 │ model     │ SaMam            │ 19.8 M │ train │     0 │
+└───┴───────────┴──────────────────┴────────┴───────┴───────┘
+Trainable params: 19.8 M                                                                                                                                                                                                                    
+Non-trainable params: 12.9 M                                                                                                                                                                                                                
+Total params: 32.7 M                                                                                                                                                                                                                        
+Total estimated model params size (MB): 130                                                                                                                                                                                                 
+Modules in train mode: 365                                                                                                                                                                                                                  
+Modules in eval mode: 0                                                                                                                                                                                                                     
+Total FLOPs: 0                                                                                                                                                                                                                              
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:434: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=35` in the `DataLoader` to improve performance.
+[VAL] total=336.5256 | content=14.8747 | style=198.7617 | id1=57.6606 | id2=65.2286
+Metric val_loss improved. New best score: 164.928
+Metric val_loss improved by 17.710 >= min_delta = 4.0. New best score: 147.218
+Metric val_loss improved by 15.886 >= min_delta = 4.0. New best score: 131.332
+Metric val_loss improved by 16.759 >= min_delta = 4.0. New best score: 114.573
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (54 bytes not processed)
+	Files: [TRAIN/Dataset/MS_COCO/train2017/000000267628.jpg, TRAIN/Dataset/wikiart/train/41945.jpg]
+Metric val_loss improved by 10.803 >= min_delta = 4.0. New best score: 103.770
+Metric val_loss improved by 8.535 >= min_delta = 4.0. New best score: 95.234
+Metric val_loss improved by 4.283 >= min_delta = 4.0. New best score: 90.951
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (80 bytes not processed)
+	Files: [TRAIN/Dataset/MS_COCO/train2017/000000475295.jpg, TRAIN/Dataset/wikiart/train/101947.jpg]
+Metric val_loss improved by 5.453 >= min_delta = 4.0. New best score: 85.498
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (54 bytes not processed)
+	Files: [TRAIN/Dataset/MS_COCO/train2017/000000301514.jpg, TRAIN/Dataset/wikiart/train/41945.jpg]
+Metric val_loss improved by 7.513 >= min_delta = 4.0. New best score: 77.986
+Metric val_loss improved by 6.253 >= min_delta = 4.0. New best score: 71.733
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (54 bytes not processed)
+	Files: [TRAIN/Dataset/MS_COCO/train2017/000000153154.jpg, TRAIN/Dataset/wikiart/train/41945.jpg]
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (34 bytes not processed)
+	Files: [TRAIN/Dataset/MS_COCO/train2017/000000493953.jpg, TRAIN/Dataset/wikiart/train/3917.jpg]
+NaN or Inf found in input tensor.
+NaN or Inf found in input tensor.
+NaN or Inf found in input tensor.
+NaN or Inf found in input tensor.
+NaN or Inf found in input tensor.
+NaN or Inf found in input tensor.
+NaN or Inf found in input tensor.
+NaN or Inf found in input tensor.
+NaN or Inf found in input tensor.
+NaN or Inf found in input tensor.
+NaN or Inf found in input tensor.
+NaN or Inf found in input tensor.
+NaN or Inf found in input tensor.
+Monitored metric val_loss = nan is not finite. Previous best value was 71.733. Signaling Trainer to stop.
+`Trainer.fit` stopped: `max_epochs=1` reached.
+[VAL] total=137.4021 | content=19.9799 | style=62.4863 | id1=5.3871 | id2=49.5487
+[VAL] total=127.5808 | content=18.9741 | style=55.0075 | id1=4.2460 | id2=49.3532
+[VAL] total=125.0669 | content=19.2001 | style=54.4533 | id1=4.0263 | id2=47.3872
+[VAL] total=119.1530 | content=18.5619 | style=47.9293 | id1=3.7009 | id2=48.9609
+[VAL] total=114.7822 | content=18.1995 | style=49.3177 | id1=3.2383 | id2=44.0268
+[VAL] total=101.6536 | content=16.9577 | style=42.6866 | id1=2.0887 | id2=39.9207
+[VAL] total=99.8089 | content=16.4747 | style=43.5637 | id1=1.8567 | id2=37.9138
+[VAL] total=97.7943 | content=14.4374 | style=45.7795 | id1=1.8782 | id2=35.6992
+[VAL] total=91.2410 | content=14.3160 | style=41.6972 | id1=1.6228 | id2=33.6050
+[VAL] total=94.7491 | content=14.3647 | style=43.3454 | id1=3.0876 | id2=33.9513
+[VAL] total=91.7624 | content=13.6097 | style=43.8283 | id1=1.9135 | id2=32.4108
+[VAL] total=81.6601 | content=13.2587 | style=36.6872 | id1=1.5256 | id2=30.1886
+[VAL] total=79.3215 | content=13.6172 | style=33.8673 | id1=1.5799 | id2=30.2571
+[VAL] total=82.4446 | content=13.3388 | style=38.5638 | id1=1.3863 | id2=29.1558
+[VAL] total=83.3739 | content=12.9489 | style=39.7400 | id1=1.4402 | id2=29.2448
+[VAL] total=76.0920 | content=13.4608 | style=33.1191 | id1=1.4470 | id2=28.0651
+[VAL] total=85.2555 | content=13.1339 | style=40.7426 | id1=1.7781 | id2=29.6010
+[VAL] total=72.3502 | content=13.4472 | style=30.3590 | id1=1.2350 | id2=27.3091
+[VAL] total=80.3099 | content=12.7318 | style=37.5919 | id1=1.7082 | id2=28.2780
+[VAL] total=80.5970 | content=11.9171 | style=40.4065 | id1=1.4025 | id2=26.8708
+[VAL] total=72.5985 | content=12.5013 | style=33.3777 | id1=1.4371 | id2=25.2823
+[VAL] total=73.8867 | content=12.4742 | style=34.7523 | id1=1.4163 | id2=25.2439
+[VAL] total=69.7597 | content=13.1875 | style=30.2010 | id1=1.0928 | id2=25.2784
+[VAL] total=69.8583 | content=11.4698 | style=33.7845 | id1=1.0436 | id2=23.5604
+[VAL] total=71.7928 | content=11.4428 | style=35.3016 | id1=1.0584 | id2=23.9900
+[VAL] total=72.6365 | content=11.4163 | style=36.1308 | id1=1.0624 | id2=24.0269
+[VAL] total=67.7907 | content=11.5077 | style=32.7759 | id1=0.9629 | id2=22.5442
+[VAL] total=71.1190 | content=11.5590 | style=35.7837 | id1=1.0891 | id2=22.6872
+[VAL] total=nan | content=nan | style=nan | id1=nan | id2=nan
+Epoch 0/0  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 7500/-- 2:17:05 • -:--:-- 1.15it/s v_num: 62.000 id_loss1: nan id_loss2: nan loss_style: nan loss_content: nan ssim_loss: 0.000 val_loss: nan
+`weights_only` was not set, defaulting to `False`.
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/linear.py:116: UserWarning: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility (Triggered internally at ../aten/src/ATen/Context.cpp:185.)
+  return F.linear(input, self.weight, self.bias)
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/functional.py:385: UserWarning: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility (Triggered internally at ../aten/src/ATen/Context.cpp:185.)
+  return _VF.einsum(equation, operands)  # type: ignore[attr-defined]
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=AlexNet_Weights.IMAGENET1K_V1`. You can also use `weights=AlexNet_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=VGG19_Weights.IMAGENET1K_V1`. You can also use `weights=VGG19_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+Repo root         : /home/austen/ComputerVisionProject/SaMam
+Checkpoint        : /home/austen/ComputerVisionProject/SaMam/OUTPUT/ps8_lr2e-04_bs8_it50k_id1_es1_hb0_ssim0_ssim_w2_20260505_205008/checkpoint.ckpt
+Output file       : /home/austen/ComputerVisionProject/SaMam/OUTPUT/ps8_lr2e-04_bs8_it50k_id1_es1_hb0_ssim0_ssim_w2_20260505_205008/evaluation.txt
+Content dir       : /home/austen/ComputerVisionProject/SaMam/TEST/eval/content
+Style dir         : /home/austen/ComputerVisionProject/SaMam/TEST/eval/style
+Selected contents : 20
+Selected styles   : 40
+Total pairs       : 800 (= 20 x 40)
+SaMam device      : cuda:0
+Eval device       : cuda
+-----------init SaMam model-----------
+inference by mamba-ssm, quick
+upsample: 8
+
+Preparing temporary eval inputs (Cartesian product benchmark)...
+
+Generating stylized outputs...
+
+Running StyleID evaluation:
+/home/austen/ComputerVisionProject/SaMam/.venv/bin/python -u /home/austen/ComputerVisionProject/SaMam/external/StyleID/evaluation/eval_artfid.py --batch_size 1 --num_workers 8 --content_metric lpips --mode art_fid_inf --device cuda --sty /tmp/artfid_eval_el5hhu_p/style --cnt /tmp/artfid_eval_el5hhu_p/content --tar /tmp/artfid_eval_el5hhu_p/output
+
+Compute FID value...
+Compute content distance...
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+Loading model from: /home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/lpips/weights/v0.1/alex.pth
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+Loading model from: /home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/lpips/weights/v0.1/alex.pth
+Compute CFSD value...
+ArtFID: 70.58196258544922 FID: 33.98714163654214 LPIPS: 1.0173687934875488 LPIPS_gray: 1.0078225135803223
+CFSD: 0.3326
+
+Saved metrics to: /home/austen/ComputerVisionProject/SaMam/OUTPUT/ps8_lr2e-04_bs8_it50k_id1_es1_hb0_ssim0_ssim_w2_20260505_205008/evaluation.txt
+
+Evaluation complete.
+DONE

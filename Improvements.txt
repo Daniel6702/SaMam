@@ -1,4 +1,0 @@
-Training Speed improvements:
-    - (NOT IMPLEMENTED) Only calculate identity loss every k steps 
-    - (IMPLEMENTED)     Ineffecient dataloader; num_workers=0, no pin_memory, no prefetching (likely cause of low gpu utilization)
-

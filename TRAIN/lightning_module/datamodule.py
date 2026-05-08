@@ -63,7 +63,7 @@ class DataModule(pl.LightningDataModule):
         return DataLoader(
             self.train_dataset,
             batch_size=self.batch_size,
-            num_workers=12,
+            num_workers=8,
             pin_memory=True,
             persistent_workers=True,
             prefetch_factor=2,

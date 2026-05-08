@@ -1,1 +1,0 @@
-step,val_loss,content,style,id1,id2,ssim

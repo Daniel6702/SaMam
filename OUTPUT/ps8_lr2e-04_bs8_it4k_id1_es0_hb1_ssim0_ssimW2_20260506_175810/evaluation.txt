@@ -1,0 +1,4 @@
+ArtFID: 25.471384048461914 FID: 17.351714303658305 LPIPS: 0.3879566788673401 LPIPS_gray: 0.2811623811721802
+CFSD: 0.1984
+
+NOTE. This was a run with Huber (nothing else). But only applied to the style loss component.

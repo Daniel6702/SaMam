@@ -1,0 +1,115 @@
+quiet missing
+-----------init SaMam model-----------
+inference by mamba-ssm, quick
+upsample: 8
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/lightning_fabric/plugins/environments/slurm.py:204: The `srun` command is available on your system but is not used. HINT: If your intention is to run Lightning on SLURM, prepend your python command with `srun` like so: srun python ./TRAIN/train_SaMam.py --content ./TRAIN/Dataset/MS_ ...
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/callbacks/model_checkpoint.py:881: Checkpoint directory /home/austen/ComputerVisionProject/SaMam/OUTPUT/ps8_lr2e-04_bs8_it10k_id1_es0_hb1_ssim0_ssim_w2_20260507_000804 exists and is not empty.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+┏━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━┳━━━━━━━┓
+┃[1;35m [0m[1;35m [0m[1;35m [0m┃[1;35m [0m[1;35mName     [0m[1;35m [0m┃[1;35m [0m[1;35mType            [0m[1;35m [0m┃[1;35m [0m[1;35mParams[0m[1;35m [0m┃[1;35m [0m[1;35mMode [0m[1;35m [0m┃[1;35m [0m[1;35mFLOPs[0m[1;35m [0m┃
+┡━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━╇━━━━━━━┩
+│[2m [0m[2m0[0m[2m [0m│ loss_func │ Integration_loss │ 12.9 M │ train │     0 │
+│[2m [0m[2m1[0m[2m [0m│ model     │ SaMam            │ 19.8 M │ train │     0 │
+└───┴───────────┴──────────────────┴────────┴───────┴───────┘
+[1mTrainable params[0m: 19.8 M                                                                                                                                                                                                           
+[1mNon-trainable params[0m: 12.9 M                                                                                                                                                                                                       
+[1mTotal params[0m: 32.7 M                                                                                                                                                                                                               
+[1mTotal estimated model params size (MB)[0m: 130                                                                                                                                                                                        
+[1mModules in train mode[0m: 365                                                                                                                                                                                                         
+[1mModules in eval mode[0m: 0                                                                                                                                                                                                            
+[1mTotal FLOPs[0m: 0                                                                                                                                                                                                                     
+[?25l[2K/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:434: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider 
+increasing the value of the `num_workers` argument` to `num_workers=35` in the `DataLoader` to improve performance.
+[2K[2K[2K[VAL] total=111.6086 | content=4.8658 | style=65.7009 | id1=30.2918 | id2=10.7502
+[2KSanity Checking [38;5;56m━━━━━━━━━━━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━[0m 1/2 [2m0:00:01 • -:--:--[0m [2;4m0.00it/s[0m  [2K[2KEpoch 0/0  [38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m 0/-- [2m0:00:00 • -:--:--[0m [2;4m0.00it/s[0m  [2KEpoch 0/0  [38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m 0/-- [2m0:00:00 • -:--:--[0m [2;4m0.00it/s[0m [3mv_num: 70.000 val_loss: 107.441[0m[2KEpoch 0/0  [38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;237m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;56m━[0m[38;5;237m━[0m[38;5;237m━[0m 0/-- [2m0:00:01 • -:--:--[0m [2;4m0.00it/s[0m [3mv_num: 70.000 val_loss: 107.441[0m
+[?25hTraceback (most recent call last):
+  File "/home/austen/ComputerVisionProject/SaMam/./TRAIN/train_SaMam.py", line 191, in <module>
+    trainer.fit(model, datamodule=datamodule)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/trainer/trainer.py", line 584, in fit
+    call._call_and_handle_interrupt(
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/trainer/call.py", line 49, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/trainer/trainer.py", line 630, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path, weights_only=weights_only)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/trainer/trainer.py", line 1079, in _run
+    results = self._run_stage()
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/trainer/trainer.py", line 1123, in _run_stage
+    self.fit_loop.run()
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/loops/fit_loop.py", line 217, in run
+    self.advance()
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/loops/fit_loop.py", line 465, in advance
+    self.epoch_loop.run(self._data_fetcher)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/loops/training_epoch_loop.py", line 153, in run
+    self.advance(data_fetcher)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/loops/training_epoch_loop.py", line 352, in advance
+    batch_output = self.automatic_optimization.run(trainer.optimizers[0], batch_idx, kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/loops/optimization/automatic.py", line 192, in run
+    self._optimizer_step(batch_idx, closure)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/loops/optimization/automatic.py", line 270, in _optimizer_step
+    call._call_lightning_module_hook(
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/trainer/call.py", line 177, in _call_lightning_module_hook
+    output = fn(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/core/module.py", line 1368, in optimizer_step
+    optimizer.step(closure=optimizer_closure)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/core/optimizer.py", line 154, in step
+    step_output = self._strategy.optimizer_step(self._optimizer, closure, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/strategies/strategy.py", line 239, in optimizer_step
+    return self.precision_plugin.optimizer_step(optimizer, model=model, closure=closure, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/plugins/precision/precision.py", line 123, in optimizer_step
+    return optimizer.step(closure=closure, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/optim/lr_scheduler.py", line 75, in wrapper
+    return wrapped(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/optim/optimizer.py", line 391, in wrapper
+    out = func(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/optim/optimizer.py", line 76, in _use_grad
+    ret = func(self, *args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/optim/adam.py", line 148, in step
+    loss = closure()
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/plugins/precision/precision.py", line 109, in _wrap_closure
+    closure_result = closure()
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/loops/optimization/automatic.py", line 146, in __call__
+    self._result = self.closure(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/utils/_contextlib.py", line 115, in decorate_context
+    return func(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/loops/optimization/automatic.py", line 131, in closure
+    step_output = self._step_fn()
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/loops/optimization/automatic.py", line 319, in _training_step
+    training_step_output = call._call_strategy_hook(trainer, "training_step", *kwargs.values())
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/trainer/call.py", line 329, in _call_strategy_hook
+    output = fn(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/strategies/strategy.py", line 391, in training_step
+    return self.lightning_module.training_step(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/lightningmodel.py", line 99, in training_step
+    return self.shared_step(batch, 'train_model')
+  File "/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/lightningmodel.py", line 110, in shared_step
+    output_Icc = self.model(content, content)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/MODEL/SaMam_model.py", line 83, in forward
+    Ics = self.decoder(res)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/ARCHI/Decoder.py", line 45, in forward
+    x = self.decoder(x)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/container.py", line 217, in forward
+    input = module(input)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1532, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1541, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/upsampling.py", line 157, in forward
+    return F.interpolate(input, self.size, self.scale_factor, self.mode, self.align_corners,
+  File "/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/functional.py", line 4028, in interpolate
+    return torch._C._nn.upsample_nearest2d(input, output_size, scale_factors)
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 32.00 MiB. GPU 

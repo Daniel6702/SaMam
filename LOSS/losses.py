@@ -87,11 +87,13 @@ class Integration_loss(nn.Module):
 
         if apply_huber_loss:
             '''
-            Huber Loss improved style performance, at a slight cost of content performance. Thus we will try to only applied it to the style loss component.
+            Huber Loss improved style performance, at a slight cost of content performance. 
+            Thus we will try to only applied it to the style loss component.
             '''
-            self.content_loss_fn = nn.MSELoss()
-            self.style_loss_fn = nn.HuberLoss(delta=1) #default: delta=1
-            self.identity_loss_fn = nn.MSELoss()
+            print("Applied Huber loss modification")
+            self.content_loss_fn = nn.HuberLoss(delta=0.5) #nn.MSELoss()
+            self.style_loss_fn = nn.HuberLoss(delta=0.1) #nn.L1Loss() #nn.HuberLoss(delta=1) #default: delta=1
+            self.identity_loss_fn = nn.HuberLoss(delta=0.1) #nn.L1Loss() #nn.HuberLoss(delta=1) #nn.MSELoss()
         else:
             self.content_loss_fn = nn.MSELoss()
             self.style_loss_fn = nn.MSELoss()
