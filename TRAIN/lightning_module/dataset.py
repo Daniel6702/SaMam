@@ -6,7 +6,7 @@ from PIL import Image
 from torch.utils.data import IterableDataset, Dataset
 from torchvision.transforms import ToTensor, Compose, Resize, CenterCrop
 from torchvision.utils import save_image
-
+import torch
 Image.MAX_IMAGE_PIXELS = None
 
 from PIL import ImageFile
@@ -82,17 +82,18 @@ class StylizationDataset(Dataset):
 
 
 class EndlessDataset(IterableDataset):
-    """
-    Wrapper for StylizationDataset which loops infinitely.
-    Usefull when training based on iterations instead of epochs
-    """
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, seed=1234, **kwargs):
         self.dataset = StylizationDataset(*args, **kwargs)
+        self.seed = seed
 
     def __iter__(self):
+        worker_info = torch.utils.data.get_worker_info()
+        worker_id = 0 if worker_info is None else worker_info.id
+
+        rng = random.Random(self.seed + worker_id)
+
         while True:
-            idx = random.randrange(len(self.dataset))
+            idx = rng.randrange(len(self.dataset))
 
             try:
                 yield self.dataset[idx]

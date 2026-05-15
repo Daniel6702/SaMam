@@ -23,13 +23,13 @@ DELTA = 1
 APPLY_IDENTITY_LOSS = True
 APPLY_BATCHING = True
 APPLY_HUBER_LOSS = False
-APPLY_SSIM_LOSS = False
+APPLY_SSIM_LOSS = True
 SSIM_WEIGHT = 2
 ACTIVATION = "silu"
 
 HUBER_DELTAS = [0.5, 0.1, 0.1]
 
-NOTE = "CONTROL"
+NOTE = "SSIM_TEST_W2"
 
 # --------------------
 # Build readable strings
@@ -90,6 +90,7 @@ args = [
     "--quiet",
     "--time-log", str(time_file),
     "--huber-deltas", *map(str, HUBER_DELTAS),
+    "--seed", "1234"
 ]
 
 if APPLY_IDENTITY_LOSS:

@@ -22,10 +22,8 @@ import time
 import json
 from datetime import datetime
 from pytorch_lightning.callbacks import Callback
-
+import pytorch_lightning as pl
 # torch.backends.cudnn.enabled = False
-torch.backends.cudnn.benchmark = True
-torch.set_float32_matmul_precision('high')
 
 class TensorBoardImageLogger(TensorBoardLogger):
     """
@@ -219,6 +217,8 @@ def parse_args():
         help='huber deltas'
     )
 
+    parser.add_argument('--seed', type=int, default=1234)
+
     parser.add_argument('--apply-batching', action='store_true', help="enable true batching")
         
     return vars(parser.parse_args())
@@ -228,6 +228,16 @@ if __name__ == '__main__':
 
     if args['quiet']:
         print("quiet missing")
+
+    pl.seed_everything(args['seed'], workers=True)
+
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    torch.use_deterministic_algorithms(True, warn_only=True)
+
+    torch.backends.cuda.matmul.allow_tf32 = False
+    torch.backends.cudnn.allow_tf32 = False
+    torch.set_float32_matmul_precision('highest')
     
     gpus = []
     for i in args['gpus']:
