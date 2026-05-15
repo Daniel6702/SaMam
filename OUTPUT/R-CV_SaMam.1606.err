@@ -1,0 +1,48 @@
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+💡 Tip: For seamless cloud logging and experiment tracking, try installing [litlogger](https://pypi.org/project/litlogger/) to enable LitLogger, which logs metrics and artifacts automatically to the Lightning Experiments platform.
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/callbacks/model_checkpoint.py:881: Checkpoint directory /home/austen/ComputerVisionProject/SaMam/OUTPUT/ps8_lr2e-04_bs8_it50k_id1_es1_hb0_ssim0_ssim_w2_tanhshrink_20260510_101454 exists and is not empty.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+SLURM auto-requeueing enabled. Setting signal handlers.
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/pytorch_lightning/trainer/connectors/data_connector.py:434: The 'val_dataloader' does not have many workers which may be a bottleneck. Consider increasing the value of the `num_workers` argument` to `num_workers=23` in the `DataLoader` to improve performance.
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (0 bytes not processed)
+	Files: [TRAIN/Dataset/MS_COCO/train2017/000000574665.jpg, TRAIN/Dataset/wikiart/train/95347.jpg]
+Metric val_loss improved. New best score: 168.623
+Metric val_loss improved by 28.972 >= min_delta = 5.0. New best score: 139.651
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (24 bytes not processed)
+	Files: [TRAIN/Dataset/MS_COCO/train2017/000000040896.jpg, TRAIN/Dataset/wikiart/train/92899.jpg]
+Metric val_loss improved by 19.298 >= min_delta = 5.0. New best score: 120.353
+Metric val_loss improved by 12.396 >= min_delta = 5.0. New best score: 107.958
+Metric val_loss improved by 9.296 >= min_delta = 5.0. New best score: 98.662
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (80 bytes not processed)
+	Files: [TRAIN/Dataset/MS_COCO/train2017/000000026745.jpg, TRAIN/Dataset/wikiart/train/101947.jpg]
+Metric val_loss improved by 7.762 >= min_delta = 5.0. New best score: 90.901
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (34 bytes not processed)
+	Files: [TRAIN/Dataset/MS_COCO/train2017/000000326035.jpg, TRAIN/Dataset/wikiart/train/3917.jpg]
+Metric val_loss improved by 9.176 >= min_delta = 5.0. New best score: 81.724
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (34 bytes not processed)
+	Files: [TRAIN/Dataset/MS_COCO/train2017/000000272405.jpg, TRAIN/Dataset/wikiart/train/3917.jpg]
+Metric val_loss improved by 8.425 >= min_delta = 5.0. New best score: 73.299
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (0 bytes not processed)
+	Files: [TRAIN/Dataset/MS_COCO/train2017/000000088315.jpg, TRAIN/Dataset/wikiart/train/95347.jpg]
+/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/dataset.py:101: 
+image file is truncated (24 bytes not processed)
+	Files: [TRAIN/Dataset/MS_COCO/train2017/000000519153.jpg, TRAIN/Dataset/wikiart/train/92899.jpg]
+Monitored metric val_loss did not improve in the last 5 records. Best score: 73.299. Signaling Trainer to stop.
+`Trainer.fit` stopped: `max_epochs=1` reached.
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/nn/modules/linear.py:116: UserWarning: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility (Triggered internally at ../aten/src/ATen/Context.cpp:185.)
+  return F.linear(input, self.weight, self.bias)
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torch/functional.py:385: UserWarning: Deterministic behavior was enabled with either `torch.use_deterministic_algorithms(True)` or `at::Context::setDeterministicAlgorithms(true)`, but this operation is not deterministic because it uses CuBLAS and you have CUDA >= 10.2. To enable deterministic behavior in this case, you must set an environment variable before running your PyTorch application: CUBLAS_WORKSPACE_CONFIG=:4096:8 or CUBLAS_WORKSPACE_CONFIG=:16:8. For more information, go to https://docs.nvidia.com/cuda/cublas/index.html#results-reproducibility (Triggered internally at ../aten/src/ATen/Context.cpp:185.)
+  return _VF.einsum(equation, operands)  # type: ignore[attr-defined]
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and may be removed in the future, please use 'weights' instead.
+  warnings.warn(
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=AlexNet_Weights.IMAGENET1K_V1`. You can also use `weights=AlexNet_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+/home/austen/ComputerVisionProject/SaMam/.venv/lib/python3.10/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and may be removed in the future. The current behavior is equivalent to passing `weights=VGG19_Weights.IMAGENET1K_V1`. You can also use `weights=VGG19_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)

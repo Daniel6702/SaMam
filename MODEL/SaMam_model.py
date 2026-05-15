@@ -14,7 +14,7 @@ class SaMam(nn.Module):
                        nSAVSSMs=2,
                        nSAVSSGs=2,
                  embed_dim=256, patch_size=8, representation_dim=64,d_state=16,expand=2.,
-                 compress_ratio=8, squeeze_factor=8,mamba_from_trion=1,use_checkpoint=False):
+                 compress_ratio=8, squeeze_factor=8,mamba_from_trion=1,use_checkpoint=False, activation="silu", apply_batching=True):
         super().__init__()
 
         print('-----------init SaMam model-----------')
@@ -24,17 +24,19 @@ class SaMam(nn.Module):
             print("inference by torch, much more slower")
 
         self.use_checkpoint = use_checkpoint
+        self.activation = activation
 
         content_encoder = [PatchEmbedNN(patch_size=patch_size, in_chans=3, embed_dim=embed_dim)]
         for _ in range(nVSSMs):
-            content_encoder.append(VSSM(hidden_dim=embed_dim, d_state=d_state, expand=expand,mamba_from_trion=mamba_from_trion))
+            content_encoder.append(
+                VSSM(hidden_dim=embed_dim, d_state=d_state, expand=expand,mamba_from_trion=mamba_from_trion, activation=activation))
         content_encoder.append(LoE(num_feat=embed_dim, compress_ratio=compress_ratio,squeeze_factor=squeeze_factor))
         self.content_encoder = nn.Sequential(*content_encoder)
 
         style_encoder = [PatchEmbedNN(patch_size=patch_size, in_chans=3, embed_dim=embed_dim)]
         for _ in range(nVSSMs):
             style_encoder.append(
-                VSSM(hidden_dim=embed_dim, d_state=d_state, expand=expand, mamba_from_trion=mamba_from_trion))
+                VSSM(hidden_dim=embed_dim, d_state=d_state, expand=expand, mamba_from_trion=mamba_from_trion, activation=activation))
         style_encoder.append(LoE(num_feat=embed_dim, compress_ratio=compress_ratio, squeeze_factor=squeeze_factor))
         self.style_encoder = nn.Sequential(*style_encoder)
 
@@ -44,7 +46,7 @@ class SaMam(nn.Module):
 
         SAVSSGs = [SAVSSG(
             nSAVSSMs=nSAVSSMs,hidden_dim=embed_dim, d_state=d_state, expand=expand, representation_dim=representation_dim,
-                              compress_ratio=compress_ratio,squeeze_factor=squeeze_factor,mamba_from_trion=mamba_from_trion) \
+                              compress_ratio=compress_ratio,squeeze_factor=squeeze_factor,mamba_from_trion=mamba_from_trion,apply_batching=apply_batching) \
                    for _ in range(nSAVSSGs)]
         self.SAVSSGs = nn.Sequential(*SAVSSGs)
         self.nSAVSSGs = nSAVSSGs

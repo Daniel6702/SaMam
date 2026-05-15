@@ -201,9 +201,27 @@ def parse_args():
         default='./loss_logs/training_time.json',
         help='Path to save training time, iterations, and iterations/sec.'
     )
-    
+
+    parser.add_argument(
+        "--activation",
+        type=str,
+        default="silu",
+        choices=["silu", "tanh", "relu", "softsign", "tanhshrink"],
+        help="Activation function for SS2D encoder"
+    )
+
+    parser.add_argument(
+        '--huber-deltas',
+        type=float,
+        nargs=3,
+        metavar=('C', 'S', 'I'),
+        default=[0.5, 0.1, 0.1],
+        help='huber deltas'
+    )
+
+    parser.add_argument('--apply-batching', action='store_true', help="enable true batching")
+        
     return vars(parser.parse_args())
-    
 
 if __name__ == '__main__':
     args = parse_args()

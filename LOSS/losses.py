@@ -11,7 +11,7 @@ loss_dir = os.path.dirname(__file__)
 vgg_ckp = os.path.join(loss_dir, 'vgg_ckp', 'vgg_normalised.pth')
 
 class Integration_loss(nn.Module):
-    def __init__(self, apply_huber_loss = False, apply_SSIM_loss = False, apply_identity_loss=False):
+    def __init__(self, apply_huber_loss = False, apply_SSIM_loss = False, apply_identity_loss=False, huber_deltas=[0.5,0.1,0.1]):
 
         super().__init__()
 
@@ -86,14 +86,10 @@ class Integration_loss(nn.Module):
                 param.requires_grad = False
 
         if apply_huber_loss:
-            '''
-            Huber Loss improved style performance, at a slight cost of content performance. 
-            Thus we will try to only applied it to the style loss component.
-            '''
             print("Applied Huber loss modification")
-            self.content_loss_fn = nn.HuberLoss(delta=0.5) #nn.MSELoss()
-            self.style_loss_fn = nn.HuberLoss(delta=0.1) #nn.L1Loss() #nn.HuberLoss(delta=1) #default: delta=1
-            self.identity_loss_fn = nn.HuberLoss(delta=0.1) #nn.L1Loss() #nn.HuberLoss(delta=1) #nn.MSELoss()
+            self.content_loss_fn = nn.HuberLoss(delta=huber_deltas[0]) 
+            self.style_loss_fn = nn.HuberLoss(delta=huber_deltas[1])
+            self.identity_loss_fn = nn.HuberLoss(delta=huber_deltas[2])            
         else:
             self.content_loss_fn = nn.MSELoss()
             self.style_loss_fn = nn.MSELoss()

@@ -16,12 +16,13 @@ class SAVSSG(nn.Module):
             compress_ratio=4, squeeze_factor=16,
             mamba_from_trion=1,
             zero_init=0,
+            apply_batching=True
     ):
         super().__init__()
 
         SAVSSMs = [SAVSSM(
             hidden_dim=hidden_dim, d_state=d_state, expand=expand,
-            representation_dim=representation_dim, mamba_from_trion=mamba_from_trion,zero_init=zero_init) \
+            representation_dim=representation_dim, mamba_from_trion=mamba_from_trion,zero_init=zero_init,apply_batching=apply_batching) \
             for _ in range(nSAVSSMs)]
         self.SAVSSMs = nn.Sequential(*SAVSSMs)
         self.nSAVSSMs = nSAVSSMs

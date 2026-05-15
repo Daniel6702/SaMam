@@ -1,0 +1,12 @@
+{
+    "finished_at": "2026-05-11T14:19:51",
+    "elapsed_seconds": 1576.1420046500862,
+    "elapsed_minutes": 26.26903341083477,
+    "elapsed_hours": 0.43781722351391283,
+    "start_global_step": 0,
+    "end_global_step": 1500,
+    "iterations_this_run": 1500,
+    "max_steps": 50000,
+    "iterations_per_second": 0.9516908981389718,
+    "seconds_per_iteration": 1.0507613364333908
+}

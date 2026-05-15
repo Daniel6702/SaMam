@@ -18,12 +18,13 @@ class SAVSSM(nn.Module):
             representation_dim: int = 64,
             mamba_from_trion=1,
             zero_init=0,
+            apply_batching=True,
             **kwargs,
     ):
         super().__init__()
         self.SAIN1 = SRAdaIN(in_channels=hidden_dim, representation_dim=representation_dim,zero_init=zero_init)
         self.SSM = SS2D(d_model=hidden_dim, d_state=d_state,expand=expand,
-                        representation_dim=representation_dim,mamba_from_trion=mamba_from_trion,zero_init=zero_init,**kwargs)
+                        representation_dim=representation_dim,mamba_from_trion=mamba_from_trion,zero_init=zero_init,apply_batching=apply_batching,**kwargs)
 
         self.patch_embed = PatchEmbed()
         self.patch_unembed = PatchUnEmbed()

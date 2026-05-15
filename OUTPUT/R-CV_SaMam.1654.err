@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/home/austen/ComputerVisionProject/SaMam/./TRAIN/train_SaMam.py", line 19, in <module>
+    from TRAIN.lightning_module.lightningmodel import LightningModel
+  File "/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/lightningmodel.py", line 11, in <module>
+    from MODEL.SaMam_model import SaMam
+  File "/home/austen/ComputerVisionProject/SaMam/MODEL/SaMam_model.py", line 7, in <module>
+    from ARCHI.SAVSSG import SAVSSG
+  File "/home/austen/ComputerVisionProject/SaMam/ARCHI/SAVSSG.py", line 5, in <module>
+    from ARCHI.SAVSSM.SAVSSM import SAVSSM
+  File "/home/austen/ComputerVisionProject/SaMam/ARCHI/SAVSSM/SAVSSM.py", line 5, in <module>
+    from ARCHI.SAVSSM.SS2D_Decoder import SS2D
+  File "/home/austen/ComputerVisionProject/SaMam/ARCHI/SAVSSM/SS2D_Decoder.py", line 143
+    def forward_core_S7_not_batched(self, x: torch.Tensor, representation):
+IndentationError: expected an indented block after 'else' statement on line 141
+Traceback (most recent call last):
+  File "/home/austen/ComputerVisionProject/SaMam/./TEST/eval.py", line 66, in <module>
+    from TRAIN.lightning_module.lightningmodel import LightningModel  # noqa: E402
+  File "/home/austen/ComputerVisionProject/SaMam/TRAIN/lightning_module/lightningmodel.py", line 11, in <module>
+    from MODEL.SaMam_model import SaMam
+  File "/home/austen/ComputerVisionProject/SaMam/MODEL/SaMam_model.py", line 7, in <module>
+    from ARCHI.SAVSSG import SAVSSG
+  File "/home/austen/ComputerVisionProject/SaMam/ARCHI/SAVSSG.py", line 5, in <module>
+    from ARCHI.SAVSSM.SAVSSM import SAVSSM
+  File "/home/austen/ComputerVisionProject/SaMam/ARCHI/SAVSSM/SAVSSM.py", line 5, in <module>
+    from ARCHI.SAVSSM.SS2D_Decoder import SS2D
+  File "/home/austen/ComputerVisionProject/SaMam/ARCHI/SAVSSM/SS2D_Decoder.py", line 143
+    def forward_core_S7_not_batched(self, x: torch.Tensor, representation):
+IndentationError: expected an indented block after 'else' statement on line 141

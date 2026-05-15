@@ -18,6 +18,7 @@ class LightningModel(pl.LightningModule):
                  nVSSMs, nSAVSSMs, nSAVSSGs,
                  embed_dim, patch_size, representation_dim, d_state, expand, compress_ratio, squeeze_factor,
                  mamba_from_trion,
+                 activation="silu",
 
                  # loss setting
                  style_weight=7.0,
@@ -32,6 +33,8 @@ class LightningModel(pl.LightningModule):
                  apply_SSIM_loss=False,
                  apply_identity_loss=False,
                  loss_log="./loss_logs/loss.txt",
+                 huber_deltas=[0.5,0.1,0.1],
+                 apply_batching=True,
                  **_):
         super().__init__()
         self.validation_step_outputs = []
@@ -43,17 +46,20 @@ class LightningModel(pl.LightningModule):
         self.lambda1 = lambda1
         self.lambda2 = lambda2
         self.ssim_weight = ssim_weight
+        self.activation = activation
         ##################
         self._printed_val = False
         ##################
         
         # Style loss
-        self.loss_func = Integration_loss(apply_huber_loss = apply_huber_loss, apply_SSIM_loss = apply_SSIM_loss, apply_identity_loss=apply_identity_loss)
+        self.loss_func = Integration_loss(apply_huber_loss = apply_huber_loss, apply_SSIM_loss = apply_SSIM_loss, apply_identity_loss=apply_identity_loss,huber_deltas=huber_deltas)
 
         self.val_loss_buffer = []
         self.pending_val_write = False
 
         self.loss_log = loss_log
+
+        self.apply_batching = apply_batching
 
         # Model
         self.model = SaMam(
@@ -69,7 +75,9 @@ class LightningModel(pl.LightningModule):
             compress_ratio=compress_ratio,
             squeeze_factor=squeeze_factor,
             mamba_from_trion=mamba_from_trion,
-            use_checkpoint=low_vram
+            use_checkpoint=low_vram,
+            activation=activation,
+            apply_batching=apply_batching,
         )
 
     def on_fit_start(self):
@@ -106,9 +114,34 @@ class LightningModel(pl.LightningModule):
     
         # Batched model calls.
         # Requires SS2D_Decoder.forward_core_S7 to support batched style-dependent A/D.
-        Ics = self.model(content, style)
-        output_Icc = self.model(content, content)
-        output_Iss = self.model(style, style)
+        if self.apply_batching:
+            Ics = self.model(content, style)
+            output_Icc = self.model(content, content)
+            output_Iss = self.model(style, style)
+        else:
+            batch_size = content.shape[0]
+            Ics = []
+            for i in range(0, batch_size):
+                content_i = content[i:i + 1, :, :, :]
+                style_i = style[i:i + 1, :, :, :]
+                output_i = self.model(content_i, style_i)
+                Ics.append(output_i)
+            Ics = torch.cat(Ics, 0)
+            
+            output_Icc = []
+            output_Iss = []
+            
+            for i in range(0, batch_size):
+                content_i = content[i:i + 1, :, :, :]
+                Icc = self.model(content_i, content_i)
+                output_Icc.append(Icc)
+            
+                style_i = style[i:i + 1, :, :, :]
+                Iss = self.model(style_i, style_i)
+                output_Iss.append(Iss)
+            
+            output_Icc = torch.cat(output_Icc, 0)
+            output_Iss = torch.cat(output_Iss, 0)
     
         content_loss, style_loss, identity_loss1, identity_loss2, ssim_loss = self.loss(
             Ics,

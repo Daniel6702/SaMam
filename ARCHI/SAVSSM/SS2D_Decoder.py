@@ -26,8 +26,10 @@ class SS2D(nn.Module):
             bias=False,
             device=None,
             dtype=None,
-            zero_init=0
+            zero_init=0,
+            apply_batching=True,
     ):
+        self.apply_batching = apply_batching
         factory_kwargs = {"device": device, "dtype": dtype}
         super().__init__()
         if mamba_from_trion:
@@ -136,6 +138,52 @@ class SS2D(nn.Module):
         return dt_proj
 
     def forward_core_S7(self, x: torch.Tensor, representation):
+        if self.apply_batching:
+            return self.forward_core_S7_batched(x,representation)
+        else:
+            return self.forward_core_S7_not_batched(x,representation)
+            
+    def forward_core_S7_not_batched(self, x: torch.Tensor, representation):
+        B, C, H, W = x.shape
+        L = H * W
+        K = 4
+
+        x = x.view(B, C, -1).contiguous()
+        (o1, o2, o3, o4), (o1_inverse, o2_inverse, o3_inverse, o4_inverse), (d1, d2, d3, d4) = get_permute_order(H, W)
+        # # print(scan_order)
+        xs = torch.stack([x[:, :, o1], x[:, :, o2], x[:, :, o3], x[:, :, o4]], dim=1)
+
+        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs.view(B, K, -1, L), self.x_proj_weight)
+        dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
+        dts = torch.einsum("b k r l, k d r -> b k d l", dts.view(B, K, -1, L), self.dt_projs_weight)
+        xs = xs.float().view(B, -1, L)
+        dts = dts.contiguous().float().view(B, -1, L)  # (b, k * d, l)
+        Bs = Bs.float().view(B, K, -1, L)
+        Cs = Cs.float().view(B, K, -1, L)  # (b, k, d_state, l)
+
+        # Ds = self.Ds.float().view(-1)
+        Ds = self.Ds_generate(representation).view(-1)
+        # As = -torch.exp(self.A_logs.float()).view(-1, self.d_state)
+        As = -torch.exp(self.A_logs_generate(representation).float()).view(-1, self.d_state)
+
+        dt_projs_bias = self.dt_projs_bias.float().view(-1)  # (k * d)
+        out_y = self.selective_scan(
+            xs, dts,
+            As, Bs, Cs, Ds, z=None,
+            delta_bias=dt_projs_bias,
+            delta_softplus=True,
+            return_last_state=False,
+        ).view(B, K, -1, L)
+        assert out_y.dtype == torch.float
+
+        y1 = out_y[:, 0, :, o1_inverse]
+        y2 = out_y[:, 1, :, o2_inverse]
+        y3 = out_y[:, 2, :, o3_inverse]
+        y4 = out_y[:, 3, :, o4_inverse]
+
+        return y1, y2, y3, y4        
+
+    def forward_core_S7_batched(self, x: torch.Tensor, representation):
         B, C, H, W = x.shape
         L = H * W
         K = 4

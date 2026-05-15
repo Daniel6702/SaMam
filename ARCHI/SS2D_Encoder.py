@@ -5,6 +5,7 @@ import torch
 # from mamba_ssm.ops.selective_scan_interface import selective_scan_fn
 from einops import repeat
 from ARCHI.archi_utils import get_permute_order
+import argparse
 
 class SS2D_encoder(nn.Module):
     def __init__(
@@ -13,6 +14,7 @@ class SS2D_encoder(nn.Module):
             d_state=16,
             d_conv=3,
             expand=2.,
+            activation="silu",
             dt_rank="auto",
             dt_min=0.001,
             dt_max=0.1,
@@ -24,7 +26,7 @@ class SS2D_encoder(nn.Module):
             conv_bias=True,
             bias=False,
             device=None,
-            dtype=None,
+            dtype=None
     ):
         factory_kwargs = {"device": device, "dtype": dtype}
         super().__init__()
@@ -54,8 +56,27 @@ class SS2D_encoder(nn.Module):
             padding=(d_conv - 1) // 2,
             **factory_kwargs,
         )
-        self.act = nn.SiLU()
+        
+        ACTIVATIONS = {
+            "silu": nn.SiLU,
+            "tanh": nn.Tanh,
+            "relu": nn.ReLU,
+            "softsign": nn.Softsign,
+            "tanhshrink": nn.Tanhshrink,
+        }
+        
+        activation = activation.lower()
+        
+        if activation not in ACTIVATIONS:
+            raise ValueError(
+                f"activation must be one of {list(ACTIVATIONS.keys())}, got {activation!r}"
+            )
+        
+        self.act = ACTIVATIONS[activation]()
+        self.activation_name = activation
+        print(f"[SS2D_encoder] activation = {self.activation_name}")
 
+        
         self.x_proj = (
             nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs),
             nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs),

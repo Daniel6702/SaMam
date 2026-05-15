@@ -13,10 +13,11 @@ class VSSM(nn.Module):
             d_state: int = 16,
             expand: float = 2.,
             mamba_from_trion=1,
+            activation="silu",
             **kwargs,
     ):
         super().__init__()
-        self.SSM = SS2D_encoder(d_model=hidden_dim, d_state=d_state,expand=expand,mamba_from_trion=mamba_from_trion, **kwargs)
+        self.SSM = SS2D_encoder(d_model=hidden_dim, d_state=d_state,expand=expand,mamba_from_trion=mamba_from_trion, activation=activation, **kwargs)
 
         self.patch_embed = PatchEmbed()
         self.patch_unembed = PatchUnEmbed()

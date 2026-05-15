@@ -1,77 +1,75 @@
 #!/usr/bin/env python3
 
 import os
-import subprocess
-from pathlib import Path
-from datetime import datetime
 import shlex
-import sys
+import subprocess
+from datetime import datetime
+from pathlib import Path
 
-# ------------------------
-# Parameters (same as Slurm)
-# ------------------------
-ITERATIONS = 10000
+
+# --------------------
+# Arguments
+# --------------------
+ITERATIONS = 5000
 LEARNING_RATE = 0.0002
 PATCH_SIZE = 8
 BATCH_SIZE = 8
 VALIDATION_INTERVAL = 250
 
-EARLY_STOPPING = 1
+EARLY_STOPPING = False
 PATIENCE = 8
-DELTA = 2
+DELTA = 1
 
-APPLY_IDENTITY_LOSS = 1
-APPLY_HUBER_LOSS = 0
-APPLY_SSIM_LOSS = 0
+APPLY_IDENTITY_LOSS = True
+APPLY_BATCHING = True
+APPLY_HUBER_LOSS = False
+APPLY_SSIM_LOSS = False
 SSIM_WEIGHT = 2
+ACTIVATION = "silu"
 
-# ------------------------
-# Build run name
-# ------------------------
+HUBER_DELTAS = [0.5, 0.1, 0.1]
+
+NOTE = "CONTROL"
+
+# --------------------
+# Build readable strings
+# --------------------
 lr_str = f"{LEARNING_RATE:.0e}"
 it_str = f"{ITERATIONS // 1000}k"
 
+id_str = f"id{int(APPLY_IDENTITY_LOSS)}"
+es_str = f"es{int(EARLY_STOPPING)}"
+hb_str = f"hb{int(APPLY_HUBER_LOSS)}"
+ss_str = f"ssim{int(APPLY_SSIM_LOSS)}"
+ssw_str = f"ssimW{SSIM_WEIGHT}"
+bt_str = f"bat{int(APPLY_BATCHING)}"
+huber_str = "-".join(str(x) for x in HUBER_DELTAS)
+
 run_name = (
     f"ps{PATCH_SIZE}_lr{lr_str}_bs{BATCH_SIZE}_it{it_str}_"
-    f"id{APPLY_IDENTITY_LOSS}_es{EARLY_STOPPING}_"
-    f"hb{APPLY_HUBER_LOSS}_ssim{APPLY_SSIM_LOSS}_ssim_w{SSIM_WEIGHT}"
+    f"{id_str}_{es_str}_{hb_str}_hd{huber_str}_"
+    f"{ss_str}_{ssw_str}_{ACTIVATION}_{bt_str}_{NOTE}"
 )
 
+
+# --------------------
+# Files and folders
+# --------------------
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-# ------------------------
-# Paths
-# ------------------------
 output_dir = Path("./OUTPUT") / f"{run_name}_{timestamp}"
 checkpoint_file = output_dir / "checkpoint.ckpt"
 loss_log_file = output_dir / "loss_log.txt"
 evaluation_file = output_dir / "evaluation.txt"
 args_file = output_dir / "args.txt"
+time_file = output_dir / "time.json"
 
-# ------------------------
-# Create venv if missing
-# ------------------------
-venv_dir = Path(".venv")
-python_bin = venv_dir / "bin" / "python"
-pip_bin = venv_dir / "bin" / "pip"
-
-if not venv_dir.exists():
-    subprocess.run([sys.executable, "-m", "venv", ".venv"], check=True)
-
-# ------------------------
-# Install dependencies
-# ------------------------
-subprocess.run([str(pip_bin), "install", "-r", "requirements.txt", "--quiet"], check=True)
-subprocess.run([str(pip_bin), "install", "scikit-learn", "--quiet"], check=True)
-
-# ------------------------
-# Create output directory
-# ------------------------
 output_dir.mkdir(parents=True, exist_ok=True)
 
-# ------------------------
+
+# --------------------
 # Build argument list
-# ------------------------
+# --------------------
 args = [
     "--content", "./TRAIN/Dataset/MS_COCO/train2017",
     "--style", "./TRAIN/Dataset/wikiart/train",
@@ -88,54 +86,63 @@ args = [
     "--val-interval", str(VALIDATION_INTERVAL),
     "--patience", str(PATIENCE),
     "--delta", str(DELTA),
+    "--activation", ACTIVATION,
     "--quiet",
+    "--time-log", str(time_file),
+    "--huber-deltas", *map(str, HUBER_DELTAS),
 ]
 
-# Conditional flags (exact match to bash logic)
-if APPLY_IDENTITY_LOSS == 1:
+if APPLY_IDENTITY_LOSS:
     args.append("--apply-identity-loss")
 
-if EARLY_STOPPING == 1:
+if EARLY_STOPPING:
     args.append("--early-stopping")
 
-if APPLY_HUBER_LOSS == 1:
+if APPLY_HUBER_LOSS:
     args.append("--apply-huber-loss")
 
-if APPLY_SSIM_LOSS == 1:
+if APPLY_SSIM_LOSS:
     args.append("--apply-SSIM-loss")
 
-# ------------------------
-# Write args.txt (bash-equivalent quoting)
-# ------------------------
-args_file.write_text(" ".join(shlex.quote(a) for a in args) + "\n")
+if APPLY_BATCHING:
+    args.append("--apply-batching")
 
-# ------------------------
-# Environment
-# ------------------------
+
+# Save arguments for reproducibility
+with args_file.open("w") as f:
+    f.write(" ".join(shlex.quote(arg) for arg in args))
+    f.write("\n")
+
+
+# Match: export PYTHONPATH="$PWD:$PYTHONPATH"
+cwd = os.getcwd()
 env = os.environ.copy()
-env["PYTHONPATH"] = f"{os.getcwd()}:{env.get('PYTHONPATH', '')}"
+env["PYTHONPATH"] = f"{cwd}:{env.get('PYTHONPATH', '')}"
 
-# ------------------------
+
+# --------------------
 # Train
-# ------------------------
+# --------------------
 subprocess.run(
-    [str(python_bin), "./TRAIN/train_SaMam.py", *args],
+    ["python", "./TRAIN/train_SaMam.py", *args],
     check=True,
-    env=env
+    env=env,
 )
 
-# ------------------------
+
+# --------------------
 # Evaluate
-# ------------------------
+# --------------------
 subprocess.run(
     [
-        str(python_bin),
+        "python",
         "./TEST/eval.py",
         "--checkpoint", str(checkpoint_file),
         "--output", str(evaluation_file),
     ],
     check=True,
-    env=env
+    env=env,
 )
+
 
 print("DONE")
