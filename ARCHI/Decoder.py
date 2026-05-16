@@ -9,34 +9,34 @@ class Decoder_NN(nn.Module):
         super().__init__()
 
         self.decoder = nn.Sequential(
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel, feature_channel//2, (3, 3)),
             nn.ReLU(),
             nn.Upsample(scale_factor=2, mode='nearest'),
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//2, feature_channel//2, (3, 3)),
             nn.ReLU(),
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//2, feature_channel//2, (3, 3)),
             nn.ReLU(),
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//2, feature_channel//2, (3, 3)),
             nn.ReLU(),
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//2, feature_channel//4, (3, 3)),
             nn.ReLU(),
             nn.Upsample(scale_factor=2, mode='nearest'),
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//4, feature_channel//4, (3, 3)),
             nn.ReLU(),
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//4, feature_channel//8, (3, 3)),
             nn.ReLU(),
             nn.Upsample(scale_factor=2, mode='nearest'),
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//8, feature_channel//8, (3, 3)),
             nn.ReLU(),
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//8, 3, (3, 3)),
         )
 
@@ -56,41 +56,41 @@ class Decoder_NN_x4(nn.Module):
         super().__init__()
 
         self.decoder = nn.Sequential(
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel, feature_channel//2, (3, 3)),
             nn.ReLU(),
 
             nn.Upsample(scale_factor=2, mode='nearest'),
 
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//2, feature_channel//2, (3, 3)),
             nn.ReLU(),
 
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//2, feature_channel//2, (3, 3)),
             nn.ReLU(),
 
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//2, feature_channel//4, (3, 3)),
             nn.ReLU(),
 
             nn.Upsample(scale_factor=2, mode='nearest'),
 
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//4, feature_channel//4, (3, 3)),
             nn.ReLU(),
 
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//4, feature_channel//8, (3, 3)),
             nn.ReLU(),
 
             # nn.Upsample(scale_factor=2, mode='nearest'),
 
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//8, feature_channel//8, (3, 3)),
             nn.ReLU(),
 
-            nn.ReflectionPad2d((1, 1, 1, 1)),
+            nn.ZeroPad2d((1, 1, 1, 1)),
             nn.Conv2d(feature_channel//8, 3, (3, 3)),
         )
 

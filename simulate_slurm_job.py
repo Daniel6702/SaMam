@@ -7,29 +7,34 @@ from datetime import datetime
 from pathlib import Path
 
 
+
 # --------------------
 # Arguments
 # --------------------
+EVAL_FRACTION = 1.0
+
 ITERATIONS = 5000
 LEARNING_RATE = 0.0002
 PATCH_SIZE = 8
-BATCH_SIZE = 8
+BATCH_SIZE = 4
 VALIDATION_INTERVAL = 250
+ACCUMULATE_GRAD_BATCHES = 2
 
 EARLY_STOPPING = False
 PATIENCE = 8
 DELTA = 1
 
+APPLY_LOW_VRAM = False
 APPLY_IDENTITY_LOSS = True
 APPLY_BATCHING = True
 APPLY_HUBER_LOSS = False
-APPLY_SSIM_LOSS = True
+APPLY_SSIM_LOSS = False
 SSIM_WEIGHT = 2
 ACTIVATION = "silu"
 
 HUBER_DELTAS = [0.5, 0.1, 0.1]
 
-NOTE = "SSIM_TEST_W2"
+NOTE = "TEST10"
 
 # --------------------
 # Build readable strings
@@ -90,7 +95,8 @@ args = [
     "--quiet",
     "--time-log", str(time_file),
     "--huber-deltas", *map(str, HUBER_DELTAS),
-    "--seed", "1234"
+    "--seed", "1234",
+    "--accumulate-grad-batches", str(ACCUMULATE_GRAD_BATCHES),
 ]
 
 if APPLY_IDENTITY_LOSS:
@@ -108,6 +114,8 @@ if APPLY_SSIM_LOSS:
 if APPLY_BATCHING:
     args.append("--apply-batching")
 
+if APPLY_LOW_VRAM:
+    args.append("--low-vram")
 
 # Save arguments for reproducibility
 with args_file.open("w") as f:
@@ -119,8 +127,8 @@ with args_file.open("w") as f:
 cwd = os.getcwd()
 env = os.environ.copy()
 env["PYTHONPATH"] = f"{cwd}:{env.get('PYTHONPATH', '')}"
-
-
+env["PYTHONHASHSEED"] = "1234"
+env["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
 # --------------------
 # Train
 # --------------------
@@ -140,6 +148,7 @@ subprocess.run(
         "./TEST/eval.py",
         "--checkpoint", str(checkpoint_file),
         "--output", str(evaluation_file),
+        "--pair_fraction", str(EVAL_FRACTION)
     ],
     check=True,
     env=env,

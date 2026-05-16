@@ -121,8 +121,26 @@ def parse_args():
         type=str,
         help="Path to the output text file where metrics will be saved.",
     )
+    parser.add_argument(
+        "--pair_fraction",
+        default=1.0,
+        type=float,
+        help=(
+            "Fraction of image pairs to evaluate. "
+            "Default is 1.0, which evaluates the full current benchmark. "
+            "For faster evaluation, use e.g. 0.2 to evaluate 20%% of pairs."
+        ),
+    )
     return parser.parse_args()
 
+def select_pair_fraction(eval_pairs, pair_fraction: float):
+    if pair_fraction <= 0.0 or pair_fraction > 1.0:
+        raise ValueError(
+            f"--pair_fraction must be in the range (0, 1], got {pair_fraction}."
+        )
+
+    n_pairs = max(1, int(round(len(eval_pairs) * pair_fraction)))
+    return eval_pairs[:n_pairs]
 
 def list_files(directory: Path):
     files = sorted([p for p in test_utils.files_in(directory) if p.is_file()])
@@ -364,6 +382,9 @@ def main():
     )
 
     eval_pairs = build_eval_pairs(selected_content_files, selected_style_files)
+    full_num_pairs = len(eval_pairs)
+
+    eval_pairs = select_pair_fraction(eval_pairs, args.pair_fraction)
     num_pairs = len(eval_pairs)
 
     print(f"Repo root         : {REPO_ROOT}")
@@ -373,7 +394,11 @@ def main():
     print(f"Style dir         : {STYLE_DIR}")
     print(f"Selected contents : {len(selected_content_files)}")
     print(f"Selected styles   : {len(selected_style_files)}")
-    print(f"Total pairs       : {num_pairs} (= {N_CONTENT_EVAL} x {N_STYLE_EVAL})")
+    print(f"Pair fraction     : {args.pair_fraction}")
+    print(
+        f"Total pairs       : {num_pairs} / {full_num_pairs} "
+        f"(full = {N_CONTENT_EVAL} x {N_STYLE_EVAL})"
+    )
 
     device = torch.device(SAMAM_DEVICE if torch.cuda.is_available() else "cpu")
     styleid_device = EVAL_DEVICE if torch.cuda.is_available() else "cpu"

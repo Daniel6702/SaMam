@@ -10,8 +10,7 @@ from torch.utils.data import DataLoader
 from torchvision import transforms
 
 from TRAIN.lightning_module import dataset
-from TRAIN.lightning_module.dataset import StylizationDataset, files_in, EndlessDataset
-
+from TRAIN.lightning_module.dataset import StylizationDataset, files_in, DeterministicTrainingDataset
 
 class DataModule(pl.LightningDataModule):
     def __init__(
@@ -20,6 +19,8 @@ class DataModule(pl.LightningDataModule):
         style,
         batch_size,
         seed,
+        iterations,
+        accumulate_grad_batches=1,
         test_content=None,
         test_style=None,
         **_,
@@ -48,12 +49,19 @@ class DataModule(pl.LightningDataModule):
             seed=self.seed,
         )
 
-        train_transforms = self.train_transforms()
-        self.train_dataset = EndlessDataset(
-            content_files,
-            style_files,
-            style_transform=train_transforms["style"],
-            content_transform=train_transforms["content"],
+        #train_transforms = self.train_transforms()
+        #self.train_dataset = EndlessDataset(
+        #    content_files,
+        #    style_files,
+        #    style_transform=train_transforms["style"],
+        #    content_transform=train_transforms["content"],
+        #    seed=self.seed,
+        #)
+        self.train_dataset = DeterministicTrainingDataset(
+            content_files=content_files,
+            style_files=style_files,
+            length=iterations * batch_size * accumulate_grad_batches,
+            seed=self.seed,
         )
 
         test_transforms = self.test_transforms()
@@ -86,28 +94,30 @@ class DataModule(pl.LightningDataModule):
             ]),
             "style": dataset.style_transforms(),
         }
-
-    @staticmethod
-    def seed_worker(worker_id):
-        worker_seed = torch.initial_seed() % 2**32
-        random.seed(worker_seed)
-        np.random.seed(worker_seed)
-
+    
+    '''
     def train_dataloader(self):
-        generator = torch.Generator()
-        generator.manual_seed(self.seed)
-
         return DataLoader(
             self.train_dataset,
             batch_size=self.batch_size,
             shuffle=False,
-            num_workers=12,
+            num_workers=8,
             pin_memory=True,
             persistent_workers=True,
             prefetch_factor=2,
-            worker_init_fn=DataModule.seed_worker,
-            generator=generator,
         )
+    '''
+    
+    def train_dataloader(self):
+        return DataLoader(
+            self.train_dataset,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=0,
+            #pin_memory=True,
+            #persistent_workers=True,
+        )
+    
 
     def val_dataloader(self):
         return DataLoader(
@@ -141,6 +151,9 @@ class DataModule(pl.LightningDataModule):
     def get_files(train_path, test_path, test_size=5, seed=1234):
         train_files = files_in(train_path)
 
+        if len(train_files) == 0:
+            raise Exception(f"No training images found in: {train_path}")
+
         if test_path is None:
             train_files, test_files = train_test_split(
                 train_files,
@@ -151,6 +164,9 @@ class DataModule(pl.LightningDataModule):
             if Path(test_path).is_dir():
                 test_files = files_in(test_path)
             else:
-                test_files = [test_path]
+                test_files = [Path(test_path)]
+
+        if len(test_files) == 0:
+            raise Exception(f"No test images found in: {test_path}")
 
         return train_files, test_files

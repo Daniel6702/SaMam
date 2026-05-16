@@ -8,21 +8,21 @@ class GlobalStyleEncoder(nn.Module):
         self.representation_dim = representation_dim
         self.patch_size = patch_size
         self.downscale = nn.Sequential(
-            nn.Conv2d(channels, channels, 3, padding=1, padding_mode='reflect'),
+            nn.Conv2d(channels, channels, 3, padding=1),
             nn.LeakyReLU(),
             nn.AvgPool2d(2, 2),
             #
-            nn.Conv2d(channels, channels, 3, padding=1, padding_mode='reflect'),
+            nn.Conv2d(channels, channels, 3, padding=1),
             nn.LeakyReLU(),
             nn.AvgPool2d(2, 2),
             #
-            nn.Conv2d(channels, channels, 3, padding=1, padding_mode='reflect'),
+            nn.Conv2d(channels, channels, 3, padding=1),
             nn.LeakyReLU(),
             nn.AvgPool2d(2, 2),
         )
         if self.patch_size == 4:
             self.downscale2 = nn.Sequential(
-                nn.Conv2d(channels, channels, 3, padding=1, padding_mode='reflect'),
+                nn.Conv2d(channels, channels, 3, padding=1),
                 nn.LeakyReLU(),
                 nn.AvgPool2d(2, 2),
         )

@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 import os
+os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
 
 project_root = os.path.abspath('..')
 import sys
@@ -159,7 +160,7 @@ def parse_args():
     parser.add_argument('--expand', type=float, default=2.0)
     parser.add_argument('--compress-ratio', type=int, default=8)
     parser.add_argument('--squeeze-factor', type=int, default=8)
-    parser.add_argument('--mamba-from-trion', type=int, default=1)
+    parser.add_argument('--mamba-from-trion', type=int, default=1) #########
 
     # training setting
     # Losses
@@ -231,9 +232,9 @@ if __name__ == '__main__':
 
     pl.seed_everything(args['seed'], workers=True)
 
-    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.benchmark = True
     torch.backends.cudnn.deterministic = True
-    torch.use_deterministic_algorithms(True, warn_only=True)
+    torch.use_deterministic_algorithms(True)
 
     torch.backends.cuda.matmul.allow_tf32 = False
     torch.backends.cudnn.allow_tf32 = False
@@ -257,15 +258,15 @@ if __name__ == '__main__':
     lr_monitor = LearningRateMonitor(logging_interval='step')
 
     #######
-    checkpoint_cb = ModelCheckpoint(
-        dirpath=os.path.dirname(args["output"]),
-        filename=Path(args["output"]).stem,   # "checkpoint"
-        monitor="val_loss",
-        mode="min",
-        save_top_k=1,
-        save_last=False,
-        auto_insert_metric_name=False,
-    )
+    #checkpoint_cb = ModelCheckpoint(
+    #    dirpath=os.path.dirname(args["output"]),
+    #    filename=Path(args["output"]).stem,   # "checkpoint"
+    #    monitor="val_loss",
+    #    mode="min",
+    #    save_top_k=1,
+    #    save_last=True,
+    #    auto_insert_metric_name=False,
+    #)
     ######
     
     early_stop = None
@@ -281,7 +282,7 @@ if __name__ == '__main__':
         
     time_logger = TrainingTimeLogger(args['time_log'])
 
-    callbacks = [lr_monitor, checkpoint_cb, time_logger]
+    callbacks = [lr_monitor, time_logger]
     
     if early_stop is not None:
         callbacks.append(early_stop)
@@ -294,10 +295,13 @@ if __name__ == '__main__':
         val_check_interval=args['val_interval'],
         logger=logger,
         callbacks=callbacks,
-        accumulate_grad_batches=args['accumulate_grad_batches']
+        accumulate_grad_batches=args['accumulate_grad_batches'],
+        #deterministic=True, [does not work]
+        benchmark=False,
+        num_sanity_val_steps=0,
         #precision="16-mixed", [does not work]
     )
 
     trainer.fit(model, datamodule=datamodule)
-    #output = args["output"]
-    #trainer.save_checkpoint(output)
+    output = args["output"]
+    trainer.save_checkpoint(output)
