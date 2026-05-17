@@ -11,9 +11,9 @@ from pathlib import Path
 # --------------------
 # Arguments
 # --------------------
-EVAL_FRACTION = 1.0
+EVAL_FRACTION = 0.4
 
-ITERATIONS = 5000
+ITERATIONS = 2000
 LEARNING_RATE = 0.0002
 PATCH_SIZE = 8
 BATCH_SIZE = 4
@@ -28,13 +28,13 @@ APPLY_LOW_VRAM = False
 APPLY_IDENTITY_LOSS = True
 APPLY_BATCHING = True
 APPLY_HUBER_LOSS = False
-APPLY_SSIM_LOSS = False
-SSIM_WEIGHT = 2
+APPLY_SSIM_LOSS = True
+SSIM_WEIGHT = 60
 ACTIVATION = "silu"
 
 HUBER_DELTAS = [0.5, 0.1, 0.1]
 
-NOTE = "TEST10"
+NOTE = "SIIM_2k_W60"
 
 # --------------------
 # Build readable strings
@@ -97,6 +97,8 @@ args = [
     "--huber-deltas", *map(str, HUBER_DELTAS),
     "--seed", "1234",
     "--accumulate-grad-batches", str(ACCUMULATE_GRAD_BATCHES),
+    "--checkpoint", "base.ckpt",
+    "--ssim-weight", str(SSIM_WEIGHT),
 ]
 
 if APPLY_IDENTITY_LOSS:

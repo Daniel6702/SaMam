@@ -232,7 +232,7 @@ if __name__ == '__main__':
 
     pl.seed_everything(args['seed'], workers=True)
 
-    torch.backends.cudnn.benchmark = True
+    torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
     torch.use_deterministic_algorithms(True)
 
@@ -248,10 +248,17 @@ if __name__ == '__main__':
         max_epochs = 1
         model = LightningModel(**args)
     else:
-        # We need to increment the max_epoch variable, because PyTorch Lightning will
-        # resume training from the beginning of the next epoch if resuming from a mid-epoch checkpoint.
-        max_epochs = torch.load(args['checkpoint'])['epoch'] + 1
-        model = LightningModel.load_from_checkpoint(checkpoint_path=args['checkpoint'])
+        ckpt_path = args["checkpoint"]
+
+        args_for_model = dict(args)
+        args_for_model.pop("checkpoint", None)
+
+        model = LightningModel.load_from_checkpoint(
+            checkpoint_path=ckpt_path,
+            **args_for_model,
+        )
+
+        max_epochs = 1
 
     datamodule = DataModule(**args)        
     logger = TensorBoardImageLogger(args['log_dir'], name='logs')

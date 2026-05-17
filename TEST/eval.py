@@ -384,7 +384,8 @@ def main():
     eval_pairs = build_eval_pairs(selected_content_files, selected_style_files)
     full_num_pairs = len(eval_pairs)
 
-    eval_pairs = select_pair_fraction(eval_pairs, args.pair_fraction)
+    #eval_pairs = select_pair_fraction(eval_pairs, args.pair_fraction)
+    eval_pairs = select_pair_fraction(eval_pairs, 1.0)
     num_pairs = len(eval_pairs)
 
     print(f"Repo root         : {REPO_ROOT}")

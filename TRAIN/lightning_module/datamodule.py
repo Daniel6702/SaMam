@@ -95,7 +95,6 @@ class DataModule(pl.LightningDataModule):
             "style": dataset.style_transforms(),
         }
     
-    '''
     def train_dataloader(self):
         return DataLoader(
             self.train_dataset,
@@ -106,8 +105,8 @@ class DataModule(pl.LightningDataModule):
             persistent_workers=True,
             prefetch_factor=2,
         )
+
     '''
-    
     def train_dataloader(self):
         return DataLoader(
             self.train_dataset,
@@ -117,7 +116,7 @@ class DataModule(pl.LightningDataModule):
             #pin_memory=True,
             #persistent_workers=True,
         )
-    
+    '''
 
     def val_dataloader(self):
         return DataLoader(

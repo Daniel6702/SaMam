@@ -1,0 +1,1 @@
+/home/Daniel6702/Projects/CV/SaMam/.venv/bin/python ./TEST/eval.py --checkpoint OUTPUT/ps8_lr2e-04_bs4_it4k_id1_es0_hb0_hd0.5-0.1-0.1_ssim1_ssimW20_silu_bat1_SSIM_2k_sweep_W20_20260517_065622/checkpoint.ckpt --output OUTPUT/ps8_lr2e-04_bs4_it4k_id1_es0_hb0_hd0.5-0.1-0.1_ssim1_ssimW20_silu_bat1_SSIM_2k_sweep_W20_20260517_065622/evaluation.txt --pair_fraction 1.0
